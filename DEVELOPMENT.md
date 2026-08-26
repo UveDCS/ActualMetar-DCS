@@ -181,6 +181,21 @@ real de `theatre` para poder añadirlo.
 Limitación conocida: Falklands sí observa horario de verano austral
 (sep-abr) que no está modelado — usa su offset estándar todo el año.
 
+## Build reproducible en CI (`.github/workflows/build.yml`)
+
+Al hacer push de un tag `v*`, GitHub Actions (runner `windows-latest`)
+ejecuta exactamente los mismos comandos de PyInstaller de la sección
+anterior, empaqueta los dos `.zip` de distribución, calcula
+`SHA256SUMS.txt` y publica todo como Release con `gh release create
+--generate-notes`. Esto es intencional, no solo comodidad: significa que
+cualquiera puede verificar que el `.exe` que se descarga es exactamente el
+que se compiló desde el código público de este repo (ver el historial en la
+pestaña Actions), en vez de tener que fiarse de un binario compilado a mano
+en un ordenador que nadie más puede inspeccionar — ver la sección "¿Es esto
+seguro?" de los README públicos. No compilar ni subir releases a mano salvo
+que el workflow falle; en ese caso, arreglar el workflow antes que
+saltárselo.
+
 ## LuaSec empaquetado: por qué y de dónde sale
 
 Decisión explícita del usuario: "no quiero que nadie ande haciendo segundos

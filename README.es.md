@@ -13,6 +13,39 @@ Proyecto independiente — **no** requiere [`dcs-sms`](https://github.com/nielsv
 aunque convive perfectamente con él si también lo tienes instalado (entrada
 de menú separada, ficheros separados).
 
+## ¿Es esto seguro?
+
+- **Código 100% abierto y auditable.** Todo el mod (Lua) y el instalador
+  (Python) están en este repositorio, sin nada oculto. Si prefieres no
+  fiarte de un `.exe` descargado, compílalo tú mismo en un par de minutos —
+  instrucciones en [`DEVELOPMENT.md`](DEVELOPMENT.md).
+- **Los `.exe` de cada [Release](../../releases) se compilan aquí mismo, en
+  GitHub Actions**, directamente desde este código fuente público (ver el
+  workflow en [`.github/workflows/build.yml`](.github/workflows/build.yml) y
+  el historial de compilaciones en [Actions](../../actions)) — no son
+  binarios subidos a mano desde un ordenador que no puedes revisar. Cada
+  release incluye un `SHA256SUMS.txt` para comprobar que el fichero que
+  descargaste es exactamente el que se compiló ahí.
+- **Sin telemetría ni servidores propios.** La única petición de red que
+  hace el mod es un GET de solo lectura a
+  [aviationweather.gov](https://aviationweather.gov) (METAR público) para el
+  ICAO que elijas — no se envía nada a ningún otro sitio.
+- **Qué toca exactamente en tu sistema** al instalar (nada más, en ningún
+  otro sitio):
+  - `<DCS>\MissionEditor\modules\real_metar\` — los ficheros del mod.
+  - `<DCS>\MissionEditor\MissionEditor.lua` — una línea añadida entre
+    marcadores propios, con backup automático (`.real-metar.bak`) antes de
+    tocarlo.
+  - `Saved Games\DCS\real-metar\` — LuaSec y tus ICAOs personalizados.
+  - `<DCS>\bin\` y `\bin-mt\` — 3 DLLs de LuaSec/OpenSSL para que funcione
+    el HTTPS (ver la nota sobre Integrity Check en
+    [Requisitos](#requisitos)).
+- **¿Por qué avisa Windows al abrir el `.exe`?** SmartScreen marca cualquier
+  ejecutable sin firma digital (firmar cuesta dinero todos los años) la
+  primera vez que se ejecuta en una máquina — es el aviso estándar para
+  software gratuito sin firmar, no un indicio de nada malicioso. Si te
+  preocupa, la alternativa es compilarlo tú mismo desde el código fuente.
+
 ## Qué hace
 
 - **METAR real a un clic.** Descarga el METAR actual de cualquier ICAO

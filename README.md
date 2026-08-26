@@ -12,6 +12,36 @@ Independent project — it does **not** require [`dcs-sms`](https://github.com/n
 though it happily coexists with it if you have that installed too (separate
 menu entry, separate files).
 
+## Is this safe?
+
+- **100% open, auditable source.** The mod (Lua) and the installer (Python)
+  are both fully in this repository, nothing hidden. If you'd rather not
+  trust a downloaded `.exe`, build it yourself in a couple of minutes —
+  instructions in [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md).
+- **The `.exe`s in every [Release](../../releases) are built right here on
+  GitHub Actions**, straight from this public source (see the workflow at
+  [`.github/workflows/build.yml`](.github/workflows/build.yml) and the build
+  history under [Actions](../../actions)) — not binaries hand-uploaded from
+  a machine you can't inspect. Every release ships a `SHA256SUMS.txt` so you
+  can verify the file you downloaded is exactly the one that got built.
+- **No telemetry, no servers of ours.** The only network request the mod
+  makes is a read-only GET to
+  [aviationweather.gov](https://aviationweather.gov) (public METAR data) for
+  whatever ICAO you pick — nothing is sent anywhere else.
+- **Exactly what it touches on your system** when you install (nothing
+  else, nowhere else):
+  - `<DCS>\MissionEditor\modules\real_metar\` — the mod's files.
+  - `<DCS>\MissionEditor\MissionEditor.lua` — one line added between its own
+    markers, with an automatic backup (`.real-metar.bak`) taken first.
+  - `Saved Games\DCS\real-metar\` — LuaSec and your custom ICAOs.
+  - `<DCS>\bin\` and `\bin-mt\` — 3 LuaSec/OpenSSL DLLs so HTTPS works (see
+    the Integrity Check note under [Requirements](#requirements)).
+- **Why does Windows warn when opening the `.exe`?** SmartScreen flags any
+  executable without a paid digital signature the first time it runs on a
+  machine — that's the standard warning for free, unsigned software, not a
+  sign of anything malicious. If that's a concern, build it yourself from
+  source instead.
+
 ## Features
 
 - **Real METAR, one click away.** Fetches the current METAR for any ICAO

@@ -12,7 +12,7 @@ import os
 import shutil
 import sys
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 # IMPORTANTE: este texto tiene que ser IDENTICO al de install.ps1 (mismo
 # marcador), o el detector de "ya esta parcheado" de un instalador no

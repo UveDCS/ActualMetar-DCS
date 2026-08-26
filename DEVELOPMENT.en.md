@@ -175,6 +175,19 @@ shows the real `theatre` string so it can be added.
 Known limitation: the Falklands do observe southern-hemisphere DST
 (Sep-Apr) that isn't modeled — its standard offset is used year-round.
 
+## Reproducible CI builds (`.github/workflows/build.yml`)
+
+Pushing a `v*` tag runs GitHub Actions (`windows-latest` runner) through the
+exact same PyInstaller commands from the section above, packages both
+distribution `.zip`s, computes `SHA256SUMS.txt`, and publishes everything as
+a Release via `gh release create --generate-notes`. This is deliberate, not
+just convenience: it means anyone can verify the `.exe` they download is
+exactly what got built from this repo's public source (see the Actions tab
+for the build history), instead of having to trust a binary hand-compiled
+on a machine nobody else can inspect — see the "Is this safe?" section in
+the public READMEs. Don't build and upload releases by hand unless the
+workflow is broken; fix the workflow first instead of working around it.
+
 ## Bundled LuaSec: why and where it's from
 
 Explicit user decision: "I don't want anyone doing a second manual step to
