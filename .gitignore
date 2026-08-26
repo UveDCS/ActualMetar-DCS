@@ -1,0 +1,15 @@
+# Build artifacts - se generan con el comando de DEVELOPMENT.md, no se versionan
+installer/build/
+installer/build_en/
+installer/dist/
+installer/__pycache__/
+installer/*.spec
+
+# Paquetes de distribucion (.exe + zip) - se publican como GitHub Release, no en el repo
+Instalacion-ES/
+Installation-EN/
+Instalacion-ES.zip
+Installation-EN.zip
+
+__pycache__/
+*.pyc

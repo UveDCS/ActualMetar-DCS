@@ -1,0 +1,33 @@
+LuaSec / OpenSSL payload bundled with REAL METAR
+==================================================
+
+These binaries let DCS World's Mission Editor make HTTPS requests (needed to
+fetch real METAR data), something DCS doesn't support out of the box.
+
+They are NOT built by the REAL METAR project. They are a pre-built LuaSec +
+OpenSSL package compiled and maintained by the dcs-sms project:
+
+    https://github.com/nielsvaes/dcs-sms
+    (tools/me-mod/luasec/payload/)
+
+Redistributed here under the terms of their upstream licenses:
+
+  - LuaSec: MIT License — https://github.com/brunoos/luasec
+  - OpenSSL: Apache License 2.0 — https://www.openssl.org/source/license.html
+  - Lua 5.1 (lua5.1.dll): MIT License — https://www.lua.org/license.html
+  - Mozilla CA certificate bundle (cacert.pem): Mozilla Public License 2.0
+    (curated by the curl project) — https://curl.se/docs/caextract.html
+
+Thank you to the dcs-sms author for compiling and sharing a working build.
+
+Contents:
+
+  lib/    -> installed to <Saved Games>\DCS\real-metar\lib\
+             (ssl.lua, ssl/https.lua, cacert.pem, ssl.dll)
+  bin/    -> installed to <DCS install>\bin\ and \bin-mt\
+             (libcrypto-4-x64.dll, libssl-4-x64.dll, lua5.1.dll)
+
+The bin/ files are only ever loaded by the Mission Editor's Lua environment,
+never during actual multiplayer flight — but some servers' Integrity Check
+could in theory flag extra files in the DCS install directory. See the main
+README's "Requirements" section for details.
