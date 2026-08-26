@@ -9,18 +9,18 @@ para quien solo quiere instalar y usar el mod.)
 ```
 install.ps1              — instalador/desinstalador (script, para desarrollo, siempre ES)
 installer/
-  installer.py            — instalador .exe (español) — empaqueta lua/real_metar
-  installer_en.py          — instalador .exe (inglés) — empaqueta lua_en/real_metar
-  dist/real-metar.exe       — binario compilado ES (PyInstaller, onefile)
-  dist/real-metar-en.exe    — binario compilado EN
+  installer.py            — instalador .exe (español) — empaqueta lua/actual_metar
+  installer_en.py          — instalador .exe (inglés) — empaqueta lua_en/actual_metar
+  dist/actual-metar.exe       — binario compilado ES (PyInstaller, onefile)
+  dist/actual-metar-en.exe    — binario compilado EN
 luasec_payload/             — LuaSec/OpenSSL precompilado, empaquetado en ambos .exe (ver mas abajo)
   ATTRIBUTION.txt            — origen y licencias
-  lib/                       — ssl.lua, ssl/https.lua, cacert.pem, ssl.dll -> Saved Games\DCS\real-metar\lib\
+  lib/                       — ssl.lua, ssl/https.lua, cacert.pem, ssl.dll -> Saved Games\DCS\actual-metar\lib\
   bin/                       — libcrypto-4-x64.dll, libssl-4-x64.dll, lua5.1.dll -> <DCS>\bin\ y \bin-mt\
-lua/real_metar/            — mod, interfaz en ESPAÑOL (original)
-lua_en/real_metar/          — mod, interfaz en INGLÉS (traducción — ver mas abajo)
+lua/actual_metar/            — mod, interfaz en ESPAÑOL (original)
+lua_en/actual_metar/          — mod, interfaz en INGLÉS (traducción — ver mas abajo)
   init.lua                 — arranque (cargado desde MissionEditor.lua)
-  menu.lua                 — entrada de menú "REAL METAR"
+  menu.lua                 — entrada de menú "ACTUAL METAR"
   window.lua                — panel (UI)
   ticker.lua                — bombea el fetch async por tick de UpdateManager
   https_transport.lua       — GET HTTPS no bloqueante (LuaSocket+LuaSec)
@@ -34,8 +34,8 @@ lua_en/real_metar/          — mod, interfaz en INGLÉS (traducción — ver ma
   dcs_maps.lua               — ICAO + zona horaria por mapa (predefinidos)
   custom_maps.lua            — ICAOs añadidos/eliminados a mano por el usuario (persistidos)
   paths.lua                  — resuelve <Saved Games>\DCS\ (compartido por lib_path y custom_maps)
-Instalacion-ES/             — paquete listo para distribuir: real-metar.exe + README.md + DEVELOPMENT.md (es)
-Installation-EN/            — idem en inglés: real-metar.exe + README.md + DEVELOPMENT.md (en)
+Instalacion-ES/             — paquete listo para distribuir: actual-metar.exe + README.md + DEVELOPMENT.md (es)
+Installation-EN/            — idem en inglés: actual-metar.exe + README.md + DEVELOPMENT.md (en)
 ```
 
 ## `lua/` vs `lua_en/`: dos copias traducidas, no una con i18n
@@ -52,8 +52,8 @@ tarea por terminada — pasó de verdad con el fix de `mission_apply.lua`
 (nubes sin preset en misiones nuevas), corregido primero en `lua/` y
 replicado en `lua_en/` en la misma sesión.
 
-El espacio de nombres interno de los módulos (`real_metar.*`) y el nombre
-de la carpeta de instalación (`MissionEditor\modules\real_metar\`) son
+El espacio de nombres interno de los módulos (`actual_metar.*`) y el nombre
+de la carpeta de instalación (`MissionEditor\modules\actual_metar\`) son
 iguales en ambos idiomas — un usuario instala uno u otro, nunca los dos a
 la vez, y el marcador de `MissionEditor.lua` (ver mas abajo) es
 intencionadamente el mismo texto para que cambiar de idioma sea solo
@@ -65,23 +65,23 @@ intencionadamente el mismo texto para que cambiar de idioma sea solo
 cd installer
 python -m pip install pyinstaller
 
-# Español (empaqueta lua/real_metar + luasec_payload):
-python -m PyInstaller --onefile --console --name real-metar --add-data "..\lua\real_metar;real_metar" --add-data "..\luasec_payload;luasec" --distpath .\dist --workpath .\build --specpath . installer.py
+# Español (empaqueta lua/actual_metar + luasec_payload):
+python -m PyInstaller --onefile --console --name actual-metar --add-data "..\lua\actual_metar;actual_metar" --add-data "..\luasec_payload;luasec" --distpath .\dist --workpath .\build --specpath . installer.py
 
-# Ingles (empaqueta lua_en/real_metar + luasec_payload):
-python -m PyInstaller --onefile --console --name real-metar-en --add-data "..\lua_en\real_metar;real_metar" --add-data "..\luasec_payload;luasec" --distpath .\dist --workpath .\build_en --specpath . installer_en.py
+# Ingles (empaqueta lua_en/actual_metar + luasec_payload):
+python -m PyInstaller --onefile --console --name actual-metar-en --add-data "..\lua_en\actual_metar;actual_metar" --add-data "..\luasec_payload;luasec" --distpath .\dist --workpath .\build_en --specpath . installer_en.py
 ```
 
 Los `.lua` y el payload de LuaSec quedan empaquetados dentro del propio
 `.exe` (extraidos a `sys._MEIPASS` en tiempo de ejecucion, en subcarpetas
-`real_metar` y `luasec` — mismos nombres para los dos idiomas). No hace
+`actual_metar` y `luasec` — mismos nombres para los dos idiomas). No hace
 falta distribuir nada más junto al ejecutable: ejecutarlo ya deja DCS listo
 para usar HTTPS, sin pasos manuales.
 
 **IMPORTANTE**: `install.ps1`, `installer/installer.py` e
 `installer/installer_en.py` usan el mismo marcador de texto exacto en
 `MissionEditor.lua`
-(`-- REAL-METAR-BEGIN (no editar a mano; gestionado por install.ps1)`,
+(`-- ACTUAL-METAR-BEGIN (no editar a mano; gestionado por install.ps1)`,
 **sin traducir**, a propósito — ver seccion anterior) para poder detectar
 si otro ya parcheó el fichero. Si se cambia ese texto en un sitio, hay que
 cambiarlo en los otros tres también — si no, un instalador no reconoce el
@@ -121,7 +121,7 @@ clave ya existía, cayendo al modelo dinámico si no — con una nota de aviso.
 Se corrigió escribiendo `clouds.preset` siempre, exista la clave o no:
 añadir una clave a una tabla Lua es seguro, y DCS solo lee las claves que
 conoce, así que el fallback (y su nota) ya no hacen falta. Aplicado en
-`lua/real_metar/mission_apply.lua` y replicado en `lua_en/`.
+`lua/actual_metar/mission_apply.lua` y replicado en `lua_en/`.
 
 ## Fecha/hora: decisión deliberada de no convertir a UTC
 
@@ -147,7 +147,7 @@ el reloj del sistema nunca los requiere).
 
 El desplegable "Mapa" tiene botones `+`/`-` para añadir o quitar entradas
 sin tocar código. Se guardan en
-`<Saved Games>\DCS\real-metar\custom_icaos.lua`, un fichero Lua normal
+`<Saved Games>\DCS\actual-metar\custom_icaos.lua`, un fichero Lua normal
 (`return { {name=, icao=, std_offset_h=, rule=}, ... }`) que se lee/escribe
 con `loadfile`/`io.open` — mismo estilo que usa `dcs-sms` para sus propios
 ajustes (`me_hotkeys.lua`, `me_scripts.lua`). Los ICAOs añadidos así no
@@ -180,6 +180,48 @@ real de `theatre` para poder añadirlo.
 
 Limitación conocida: Falklands sí observa horario de verano austral
 (sep-abr) que no está modelado — usa su offset estándar todo el año.
+
+## Rename del proyecto: "REAL METAR" -> "ACTUAL METAR"
+
+Decisión explícita del usuario, sin motivo técnico. El rename tocó **todo**:
+namespace Lua (`real_metar` -> `actual_metar`, carpetas `lua/real_metar/` ->
+`lua/actual_metar/` y `lua_en/` igual), el marcador de `MissionEditor.lua`
+(`REAL-METAR-BEGIN/END` -> `ACTUAL-METAR-BEGIN/END`), la carpeta de datos en
+`Saved Games\DCS\real-metar\` -> `\actual-metar\`, la carpeta de config del
+instalador (`%AppData%\real-metar\` -> `\actual-metar\`), el texto visible
+del menú/panel en el Mission Editor, y el repositorio de GitHub
+(<https://github.com/UveDCS/ActualMetar-DCS>).
+
+**Migración de instalaciones ya existentes** (importante: el usuario ya
+tenía esto instalado de verdad en su `F:\DCS World` antes del rename): los
+tres instaladores (`installer.py`, `installer_en.py`, `install.ps1`)
+guardan constantes `OLD_BEGIN_MARKER`/`OLD_END_MARKER` (el texto antiguo
+`REAL-METAR-...`) solo para detectar y limpiar instalaciones previas, nunca
+para generarlas. En `install()`/`Install-LuaSec` se añadió, en este orden:
+
+1. Si existe `MissionEditor\modules\real_metar\` (carpeta antigua), se borra
+   antes de crear la nueva `modules\actual_metar\`.
+2. Si `MissionEditor.lua` tiene el bloque antiguo `REAL-METAR-BEGIN/END`, se
+   quita **antes** de comprobar/añadir el bloque nuevo (si no, quedarían los
+   dos `require` a la vez: `real_metar.init` Y `actual_metar.init`).
+3. Si existe `Saved Games\DCS\real-metar\` y **no** existe ya
+   `\actual-metar\`, se **mueve** la carpeta entera (no se copia y se borra
+   el original por separado) — así se preserva `custom_icaos.lua` (datos del
+   usuario) sin tocarlo, y `lib\` se sobrescribe después con el payload
+   empaquetado de todas formas. Si ambas carpetas ya existen (reinstalación
+   repetida), no se toca ninguna — se asume la nueva como buena y no se
+   borra la antigua por si acaso.
+
+Probado de punta a punta en un sandbox aislado que reproduce exactamente el
+estado real previo (marcador antiguo + `modules\real_metar\` con un fichero
++ `Saved Games\...\real-metar\` con `custom_icaos.lua` y un `ssl.lua`
+antiguo): tras `install()`, la carpeta antigua de módulos desaparece, el
+marcador nuevo aparece una sola vez (el viejo, cero veces), `custom_icaos.lua`
+sobrevive con su contenido intacto, y `lib\` queda con el payload real
+(no el `ssl.lua` de prueba). Ver la disciplina de pruebas seguras más abajo.
+
+`VERSION` subió a `0.2.0` (rename es un cambio que rompe compatibilidad de
+nombres, aunque la migración lo haga transparente para el usuario).
 
 ## Build reproducible en CI (`.github/workflows/build.yml`)
 
@@ -219,7 +261,7 @@ precompilado en su propio repo público. Crédito y detalle en
 
 `install_luasec()` (mismo nombre en `installer.py`/`installer_en.py`,
 `Install-LuaSec` en `install.ps1`) hace dos copias:
-- `luasec_payload/lib/*` → `Saved Games\DCS\real-metar\lib\` (recursivo, por
+- `luasec_payload/lib/*` → `Saved Games\DCS\actual-metar\lib\` (recursivo, por
   `ssl/https.lua`). `lib_path.lua` ya buscaba aquí primero antes de caer a
   `dcs-sms\lib\`, así que no hizo falta tocar ningún `.lua`.
 - `luasec_payload/bin/*` → `<DCS>\bin\` y `<DCS>\bin-mt\`, solo en las que
@@ -235,7 +277,7 @@ algunos servidores MP podría en teoría marcar estas DLLs nuevas en `bin\`.
 Ver el razonamiento completo (por qué en la práctica no ha dado problemas)
 en los README públicos, sección "Requisitos"/"Requirements".
 
-Desinstalar (`uninstall`) sigue sin tocar `Saved Games\DCS\real-metar\lib\`
+Desinstalar (`uninstall`) sigue sin tocar `Saved Games\DCS\actual-metar\lib\`
 ni las DLLs de `bin\`/`bin-mt\` — mismo criterio que ya usa `dcs-sms` de no
 borrar nada con pinta de dato de usuario en el desinstalador. No se ha
 pedido lo contrario.
@@ -248,7 +290,7 @@ de la máquina igual que la real. Durante el desarrollo esto llegó a hacer
 que una prueba tocara por accidente la instalación real (borró la carpeta
 de módulos y estuvo a punto de duplicar el parche). Al probar cualquiera de
 los dos instaladores contra una carpeta falsa, sembrar siempre
-`%AppData%\real-metar\config.json` con una ruta claramente falsa *antes* de
+`%AppData%\actual-metar\config.json` con una ruta claramente falsa *antes* de
 ejecutar, y verificar con una llamada de depuración a `resolve_dcs_path()`
 que devuelve esa ruta falsa antes de dejar que el instalador toque nada.
 

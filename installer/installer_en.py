@@ -1,4 +1,4 @@
-"""REAL METAR - interactive installer for the DCS World Mission Editor mod.
+"""ACTUAL METAR - interactive installer for the DCS World Mission Editor mod.
 
 Mirrors dcs-sms.exe's menu style: a standalone .exe (built with PyInstaller)
 that needs nothing else alongside it - the mod's Lua files are bundled
@@ -6,8 +6,8 @@ inside.
 
 Normal use: double-click. Opens a numbered menu in the console.
 
-This is the ENGLISH build: it bundles lua_en/real_metar (the English UI
-translation of the mod) instead of lua/real_metar (Spanish, original).
+This is the ENGLISH build: it bundles lua_en/actual_metar (the English UI
+translation of the mod) instead of lua/actual_metar (Spanish, original).
 """
 
 import json
@@ -15,17 +15,22 @@ import os
 import shutil
 import sys
 
-VERSION = "0.1.1"
+VERSION = "0.2.0"
 
 # IMPORTANT: this text must be IDENTICAL to install.ps1's marker (and to
 # installer.py's, the Spanish build) - not translated. Both language
-# installers target the same require('real_metar.init') line, so keeping
+# installers target the same require('actual_metar.init') line, so keeping
 # one shared marker means installing one language over the other just
 # refreshes the module files instead of duplicating the require.
-BEGIN_MARKER = "-- REAL-METAR-BEGIN (no editar a mano; gestionado por install.ps1)"
-END_MARKER = "-- REAL-METAR-END"
+BEGIN_MARKER = "-- ACTUAL-METAR-BEGIN (no editar a mano; gestionado por install.ps1)"
+END_MARKER = "-- ACTUAL-METAR-END"
 
-CONFIG_DIR = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "real-metar")
+# Old names (the project used to be called "REAL METAR"). Only used to
+# migrate existing installs to the new names; never generated anymore.
+OLD_BEGIN_MARKER = "-- REAL-METAR-BEGIN (no editar a mano; gestionado por install.ps1)"
+OLD_END_MARKER = "-- REAL-METAR-END"
+
+CONFIG_DIR = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "actual-metar")
 CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
 
 DCS_SMS_CONFIG = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "dcs-sms", "config.toml")
@@ -34,13 +39,13 @@ DCS_SMS_CONFIG = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~"))
 def bundled_lua_dir():
     """Folder with the mod's .lua files: inside the packaged .exe
     (PyInstaller onefile unpacks it to sys._MEIPASS), or the repo's actual
-    lua_en/real_metar files (no copy of our own) when run as a plain script
+    lua_en/actual_metar files (no copy of our own) when run as a plain script
     in development."""
     base = getattr(sys, "_MEIPASS", None)
     if base:
-        return os.path.join(base, "real_metar")
+        return os.path.join(base, "actual_metar")
     here = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(here, "..", "lua_en", "real_metar")
+    return os.path.join(here, "..", "lua_en", "actual_metar")
 
 
 def bundled_luasec_dir():
@@ -177,7 +182,7 @@ def prompt_manual_path():
 def install_luasec(dcs_path):
     """Copies the bundled LuaSec/OpenSSL payload so HTTPS fetches work with no
     manual steps (see luasec_payload/ATTRIBUTION.txt for provenance and
-    licenses). lib/ -> Saved Games\\DCS\\real-metar\\lib\\; bin/ -> <DCS>\\bin\\
+    licenses). lib/ -> Saved Games\\DCS\\actual-metar\\lib\\; bin/ -> <DCS>\\bin\\
     and \\bin-mt\\ (whichever exist)."""
     payload = bundled_luasec_dir()
     lib_src = os.path.join(payload, "lib")
@@ -188,7 +193,13 @@ def install_luasec(dcs_path):
         return
 
     saved_games = resolve_saved_games_dir(dcs_path)
-    lib_dst = os.path.join(saved_games, "real-metar", "lib")
+    own_dir = os.path.join(saved_games, "actual-metar")
+    old_own_dir = os.path.join(saved_games, "real-metar")
+    if os.path.isdir(old_own_dir) and not os.path.isdir(own_dir):
+        shutil.move(old_own_dir, own_dir)
+        print(f"Old 'real-metar' folder migrated to 'actual-metar': {own_dir}")
+
+    lib_dst = os.path.join(own_dir, "lib")
     for root, _dirs, files in os.walk(lib_src):
         rel = os.path.relpath(root, lib_src)
         dst_root = lib_dst if rel == "." else os.path.join(lib_dst, rel)
@@ -215,7 +226,8 @@ def install(dcs_path):
         return
 
     me_lua = os.path.join(dcs_path, "MissionEditor", "MissionEditor.lua")
-    modules_dir = os.path.join(dcs_path, "MissionEditor", "modules", "real_metar")
+    modules_dir = os.path.join(dcs_path, "MissionEditor", "modules", "actual_metar")
+    old_modules_dir = os.path.join(dcs_path, "MissionEditor", "modules", "real_metar")
     source_dir = bundled_lua_dir()
 
     if not os.path.isdir(source_dir):
@@ -224,6 +236,10 @@ def install(dcs_path):
     if not os.path.isfile(me_lua):
         print(f"ERROR: MissionEditor.lua not found at: {me_lua}")
         return
+
+    if os.path.isdir(old_modules_dir):
+        shutil.rmtree(old_modules_dir)
+        print(f"Old 'real_metar' folder removed (project renamed to 'actual_metar'): {old_modules_dir}")
 
     os.makedirs(modules_dir, exist_ok=True)
     copied = 0
@@ -236,17 +252,26 @@ def install(dcs_path):
     with open(me_lua, "r", encoding="utf-8", errors="surrogateescape") as f:
         content = f.read()
 
+    old_start = content.find(OLD_BEGIN_MARKER)
+    old_end = content.find(OLD_END_MARKER)
+    if old_start != -1 and old_end != -1:
+        old_end += len(OLD_END_MARKER)
+        content = content[:old_start] + content[old_end:]
+        with open(me_lua, "w", encoding="utf-8", errors="surrogateescape") as f:
+            f.write(content)
+        print("Old REAL-METAR block removed from MissionEditor.lua (project renamed to ACTUAL-METAR).")
+
     if BEGIN_MARKER not in content:
-        backup = me_lua + ".real-metar.bak"
+        backup = me_lua + ".actual-metar.bak"
         if not os.path.isfile(backup):
             shutil.copy2(me_lua, backup)
             print(f"Backup created: {backup}")
-        block = f"\n{BEGIN_MARKER}\nrequire('real_metar.init')\n{END_MARKER}\n"
+        block = f"\n{BEGIN_MARKER}\nrequire('actual_metar.init')\n{END_MARKER}\n"
         with open(me_lua, "a", encoding="utf-8", errors="surrogateescape") as f:
             f.write(block)
         print("MissionEditor.lua patched (require added).")
     else:
-        print("MissionEditor.lua already had the REAL METAR require (left untouched).")
+        print("MissionEditor.lua already had the ACTUAL METAR require (left untouched).")
 
     print()
     install_luasec(dcs_path)
@@ -254,7 +279,7 @@ def install(dcs_path):
     print()
     print("Install complete.")
     print("FULLY restart DCS World (not just the Mission Editor) and open the editor:")
-    print("REAL METAR should now be in the top menu bar.")
+    print("ACTUAL METAR should now be in the top menu bar.")
     print()
     print("Note: a few support files (LuaSec/OpenSSL) were copied into your DCS install")
     print("('bin\\' and 'bin-mt\\') so the HTTPS fetch works with no extra steps. They come")
@@ -270,7 +295,7 @@ def uninstall(dcs_path):
         return
 
     me_lua = os.path.join(dcs_path, "MissionEditor", "MissionEditor.lua")
-    modules_dir = os.path.join(dcs_path, "MissionEditor", "modules", "real_metar")
+    modules_dir = os.path.join(dcs_path, "MissionEditor", "modules", "actual_metar")
 
     if os.path.isfile(me_lua):
         with open(me_lua, "r", encoding="utf-8", errors="surrogateescape") as f:
@@ -282,9 +307,9 @@ def uninstall(dcs_path):
             new_content = content[:start] + content[end:]
             with open(me_lua, "w", encoding="utf-8", errors="surrogateescape") as f:
                 f.write(new_content)
-            print("REAL METAR block removed from MissionEditor.lua.")
+            print("ACTUAL METAR block removed from MissionEditor.lua.")
         else:
-            print("MissionEditor.lua had no REAL METAR block (nothing to remove).")
+            print("MissionEditor.lua had no ACTUAL METAR block (nothing to remove).")
 
     if os.path.isdir(modules_dir):
         shutil.rmtree(modules_dir)
@@ -298,13 +323,13 @@ def main():
 
     while True:
         print()
-        print(f"REAL METAR  v{VERSION}")
+        print(f"ACTUAL METAR  v{VERSION}")
         print()
         print(f"  DCS install: {dcs_path or 'not detected'}")
         print()
-        print("  1. Install or update REAL METAR (mod + require in MissionEditor.lua)")
+        print("  1. Install or update ACTUAL METAR (mod + require in MissionEditor.lua)")
         print("     - Not sure which to pick? Pick this. It leaves the latest version installed.")
-        print("  2. Uninstall REAL METAR")
+        print("  2. Uninstall ACTUAL METAR")
         print("  3. Set the DCS World install path manually")
         print("  q. Quit")
         print()

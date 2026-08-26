@@ -1,14 +1,14 @@
--- window.lua — panel "REAL METAR". Un solo Window flotante, patron
+-- window.lua — panel "ACTUAL METAR". Un solo Window flotante, patron
 -- single-instance igual que dcs_sms_me.about / prefab_manager. Solo usa
 -- widgets confirmados en el codigo de dcs-sms: Window, Static, EditBox,
 -- Button (ver about.lua / mass_edit_forms/*.lua de ese proyecto).
 
-local dcs_maps = require("real_metar.dcs_maps")
-local mission_datetime = require("real_metar.mission_datetime")
-local mission_apply = require("real_metar.mission_apply")
-local metar_fetch = require("real_metar.metar_fetch")
-local ticker = require("real_metar.ticker")
-local custom_maps = require("real_metar.custom_maps")
+local dcs_maps = require("actual_metar.dcs_maps")
+local mission_datetime = require("actual_metar.mission_datetime")
+local mission_apply = require("actual_metar.mission_apply")
+local metar_fetch = require("actual_metar.metar_fetch")
+local ticker = require("actual_metar.ticker")
+local custom_maps = require("actual_metar.custom_maps")
 
 local M = {}
 local W = nil
@@ -27,7 +27,7 @@ local state = {
 local select_time_mode = nil
 
 local function log_err(msg)
-    pcall(function() _G.log.write("real_metar", _G.log.ERROR or 1, tostring(msg)) end)
+    pcall(function() _G.log.write("actual_metar", _G.log.ERROR or 1, tostring(msg)) end)
 end
 
 local function make_label(text, skin_fn)
@@ -69,7 +69,7 @@ local function make_button(text, on_click)
             local ok, err = pcall(on_click)
             if not ok then
                 log_err("boton '" .. tostring(text) .. "' fallo: " .. tostring(err))
-                set_text(widgets.apply_status_lbl, "Error interno (ver dcs.log, real_metar): " .. tostring(err))
+                set_text(widgets.apply_status_lbl, "Error interno (ver dcs.log, actual_metar): " .. tostring(err))
             end
         end)
     end
@@ -307,7 +307,7 @@ local function detect_map()
 end
 
 -- ---------------------------------------------------------------------------
--- Fetch METAR (bombeado por real_metar.ticker una vez por tick)
+-- Fetch METAR (bombeado por actual_metar.ticker una vez por tick)
 
 local tick_count = 0
 local function poll_job()
@@ -316,7 +316,7 @@ local function poll_job()
         set_text(widgets.tick_lbl, "ticks: " .. tick_count)
     end
     if tick_count == 1 then
-        pcall(function() _G.log.write("real_metar", _G.log.INFO or 3, "primer tick recibido - UpdateManager funciona") end)
+        pcall(function() _G.log.write("actual_metar", _G.log.INFO or 3, "primer tick recibido - UpdateManager funciona") end)
     end
     pcall(sync_map_combo)
     if not state.job then return end
@@ -342,7 +342,7 @@ local function poll_job()
     end
 end
 
-M._poll_job = poll_job -- expuesto para real_metar.ticker
+M._poll_job = poll_job -- expuesto para actual_metar.ticker
 
 local function on_fetch_click()
     if not ticker.is_installed() then
@@ -351,7 +351,7 @@ local function on_fetch_click()
     if not ticker.is_installed() then
         set_text(widgets.status_lbl,
             "Error: el bombeo (UpdateManager) no esta disponible en este editor - " ..
-            "el fetch no puede avanzar. Mira dcs.log (real_metar).")
+            "el fetch no puede avanzar. Mira dcs.log (actual_metar).")
         return
     end
     local icao = get_text(widgets.icao_box)
@@ -466,7 +466,7 @@ function M.toggle()
         local x = math.floor((screen_w - w) / 2)
         local y = math.floor((screen_h - h) / 2)
 
-        W = Window.new(x, y, w, h, "REAL METAR")
+        W = Window.new(x, y, w, h, "ACTUAL METAR")
         pcall(function()
             local skin = (Skin.windowSkinME and Skin.windowSkinME()) or Skin.windowSkin()
             if skin then W:setSkin(skin) end

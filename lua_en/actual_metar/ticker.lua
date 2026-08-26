@@ -16,7 +16,7 @@ local M = {}
 local installed = false
 
 local function tick()
-    local ok, win = pcall(require, "real_metar.window")
+    local ok, win = pcall(require, "actual_metar.window")
     if ok and win and win._poll_job then
         pcall(win._poll_job)
     end
@@ -29,7 +29,7 @@ function M.install()
     local ok_req, UpdateManager = pcall(require, "UpdateManager")
     if not ok_req or type(UpdateManager) ~= "table" or type(UpdateManager.add) ~= "function" then
         pcall(function()
-            _G.log.write("real_metar", _G.log.ERROR or 1,
+            _G.log.write("actual_metar", _G.log.ERROR or 1,
                 "require('UpdateManager') failed or has no .add (ok=" .. tostring(ok_req) ..
                 ", type=" .. type(UpdateManager) .. ")")
         end)
@@ -38,11 +38,11 @@ function M.install()
 
     local ok, err = pcall(UpdateManager.add, tick)
     if not ok then
-        pcall(function() _G.log.write("real_metar", _G.log.ERROR or 1, "UpdateManager.add failed: " .. tostring(err)) end)
+        pcall(function() _G.log.write("actual_metar", _G.log.ERROR or 1, "UpdateManager.add failed: " .. tostring(err)) end)
         return false
     end
     installed = true
-    pcall(function() _G.log.write("real_metar", _G.log.INFO or 3, "ticker installed on UpdateManager") end)
+    pcall(function() _G.log.write("actual_metar", _G.log.INFO or 3, "ticker installed on UpdateManager") end)
     return true
 end
 

@@ -9,18 +9,18 @@ people who just want to install and use the mod.)
 ```
 install.ps1              — installer/uninstaller (script, for development, always ES)
 installer/
-  installer.py            — .exe installer (Spanish) — bundles lua/real_metar
-  installer_en.py          — .exe installer (English) — bundles lua_en/real_metar
-  dist/real-metar.exe       — compiled ES binary (PyInstaller, onefile)
-  dist/real-metar-en.exe    — compiled EN binary
+  installer.py            — .exe installer (Spanish) — bundles lua/actual_metar
+  installer_en.py          — .exe installer (English) — bundles lua_en/actual_metar
+  dist/actual-metar.exe       — compiled ES binary (PyInstaller, onefile)
+  dist/actual-metar-en.exe    — compiled EN binary
 luasec_payload/             — precompiled LuaSec/OpenSSL, bundled into both .exe (see below)
   ATTRIBUTION.txt            — provenance and licenses
-  lib/                       — ssl.lua, ssl/https.lua, cacert.pem, ssl.dll -> Saved Games\DCS\real-metar\lib\
+  lib/                       — ssl.lua, ssl/https.lua, cacert.pem, ssl.dll -> Saved Games\DCS\actual-metar\lib\
   bin/                       — libcrypto-4-x64.dll, libssl-4-x64.dll, lua5.1.dll -> <DCS>\bin\ and \bin-mt\
-lua/real_metar/            — mod, SPANISH UI (original)
-lua_en/real_metar/          — mod, ENGLISH UI (translation — see below)
+lua/actual_metar/            — mod, SPANISH UI (original)
+lua_en/actual_metar/          — mod, ENGLISH UI (translation — see below)
   init.lua                 — bootstrap (loaded from MissionEditor.lua)
-  menu.lua                 — "REAL METAR" menu entry
+  menu.lua                 — "ACTUAL METAR" menu entry
   window.lua                — panel (UI)
   ticker.lua                — pumps the async fetch on every UpdateManager tick
   https_transport.lua       — non-blocking HTTPS GET (LuaSocket+LuaSec)
@@ -34,8 +34,8 @@ lua_en/real_metar/          — mod, ENGLISH UI (translation — see below)
   dcs_maps.lua               — ICAO + timezone per map (built-in)
   custom_maps.lua            — user-added/removed ICAOs (persisted)
   paths.lua                  — resolves <Saved Games>\DCS\ (shared by lib_path and custom_maps)
-Instalacion-ES/             — ready-to-distribute package: real-metar.exe + README.md + DEVELOPMENT.md (es)
-Installation-EN/            — same in English: real-metar.exe + README.md + DEVELOPMENT.md (en)
+Instalacion-ES/             — ready-to-distribute package: actual-metar.exe + README.md + DEVELOPMENT.md (es)
+Installation-EN/            — same in English: actual-metar.exe + README.md + DEVELOPMENT.md (en)
 ```
 
 ## `lua/` vs `lua_en/`: two translated copies, not one with i18n
@@ -51,8 +51,8 @@ before the task is considered done — this actually happened with the
 `mission_apply.lua` fix (clouds with no preset field on new missions),
 fixed first in `lua/` and mirrored into `lua_en/` in the same session.
 
-The modules' internal namespace (`real_metar.*`) and the install folder
-name (`MissionEditor\modules\real_metar\`) are the same in both languages —
+The modules' internal namespace (`actual_metar.*`) and the install folder
+name (`MissionEditor\modules\actual_metar\`) are the same in both languages —
 a user installs one or the other, never both at once, and the
 `MissionEditor.lua` marker (see below) is intentionally the same text so
 switching languages is just "run the other installer," with no leftovers
@@ -64,23 +64,23 @@ from the previous one.
 cd installer
 python -m pip install pyinstaller
 
-# Spanish (bundles lua/real_metar + luasec_payload):
-python -m PyInstaller --onefile --console --name real-metar --add-data "..\lua\real_metar;real_metar" --add-data "..\luasec_payload;luasec" --distpath .\dist --workpath .\build --specpath . installer.py
+# Spanish (bundles lua/actual_metar + luasec_payload):
+python -m PyInstaller --onefile --console --name actual-metar --add-data "..\lua\actual_metar;actual_metar" --add-data "..\luasec_payload;luasec" --distpath .\dist --workpath .\build --specpath . installer.py
 
-# English (bundles lua_en/real_metar + luasec_payload):
-python -m PyInstaller --onefile --console --name real-metar-en --add-data "..\lua_en\real_metar;real_metar" --add-data "..\luasec_payload;luasec" --distpath .\dist --workpath .\build_en --specpath . installer_en.py
+# English (bundles lua_en/actual_metar + luasec_payload):
+python -m PyInstaller --onefile --console --name actual-metar-en --add-data "..\lua_en\actual_metar;actual_metar" --add-data "..\luasec_payload;luasec" --distpath .\dist --workpath .\build_en --specpath . installer_en.py
 ```
 
 The `.lua` files and the LuaSec payload get bundled inside the `.exe`
 itself (extracted to `sys._MEIPASS` at runtime, under subfolders
-`real_metar` and `luasec` — same names for both languages). Nothing else
+`actual_metar` and `luasec` — same names for both languages). Nothing else
 needs to be distributed alongside the executable: running it leaves DCS
 ready for HTTPS, no manual steps.
 
 **IMPORTANT**: `install.ps1`, `installer/installer.py`, and
 `installer/installer_en.py` all use the exact same marker text in
 `MissionEditor.lua`
-(`-- REAL-METAR-BEGIN (no editar a mano; gestionado por install.ps1)`,
+(`-- ACTUAL-METAR-BEGIN (no editar a mano; gestionado por install.ps1)`,
 **left untranslated** on purpose — see the previous section) so each can
 detect whether another one already patched the file. If that text changes
 in one place, it has to change in the other three too — otherwise one
@@ -118,7 +118,7 @@ already existed, falling back to the dynamic model otherwise — with a
 warning note. Fixed by always writing `clouds.preset`, whether the key
 existed or not: adding a key to a Lua table is safe, and DCS only reads the
 keys it knows about, so the fallback (and its note) are no longer needed.
-Applied in `lua/real_metar/mission_apply.lua` and mirrored into `lua_en/`.
+Applied in `lua/actual_metar/mission_apply.lua` and mirrored into `lua_en/`.
 
 ## Date/time: deliberate decision not to convert to UTC
 
@@ -143,7 +143,7 @@ never does).
 
 The "Map" dropdown has `+`/`-` buttons to add or remove entries without
 touching code. They're saved to
-`<Saved Games>\DCS\real-metar\custom_icaos.lua`, a plain Lua file
+`<Saved Games>\DCS\actual-metar\custom_icaos.lua`, a plain Lua file
 (`return { {name=, icao=, std_offset_h=, rule=}, ... }`) read/written with
 `loadfile`/`io.open` — same style `dcs-sms` uses for its own settings
 (`me_hotkeys.lua`, `me_scripts.lua`). ICAOs added this way have no known
@@ -174,6 +174,49 @@ shows the real `theatre` string so it can be added.
 
 Known limitation: the Falklands do observe southern-hemisphere DST
 (Sep-Apr) that isn't modeled — its standard offset is used year-round.
+
+## Project rename: "REAL METAR" -> "ACTUAL METAR"
+
+Explicit user decision, no technical reason behind it. The rename touched
+**everything**: the Lua namespace (`real_metar` -> `actual_metar`, folders
+`lua/real_metar/` -> `lua/actual_metar/` and same for `lua_en/`), the
+`MissionEditor.lua` marker (`REAL-METAR-BEGIN/END` ->
+`ACTUAL-METAR-BEGIN/END`), the data folder under
+`Saved Games\DCS\real-metar\` -> `\actual-metar\`, the installer's own
+config folder (`%AppData%\real-metar\` -> `\actual-metar\`), the visible
+menu/panel text in the Mission Editor, and the GitHub repository
+(<https://github.com/UveDCS/ActualMetar-DCS>).
+
+**Migrating existing installs** (important: the user already had this
+genuinely installed on their `F:\DCS World` before the rename): all three
+installers (`installer.py`, `installer_en.py`, `install.ps1`) keep
+`OLD_BEGIN_MARKER`/`OLD_END_MARKER` constants (the old `REAL-METAR-...`
+text) purely to detect and clean up previous installs, never to generate
+them. `install()`/`Install-LuaSec` gained, in this order:
+
+1. If `MissionEditor\modules\real_metar\` (old folder) exists, delete it
+   before creating the new `modules\actual_metar\`.
+2. If `MissionEditor.lua` has the old `REAL-METAR-BEGIN/END` block, remove
+   it **before** checking/adding the new block (otherwise both `require`
+   calls would end up present at once: `real_metar.init` AND
+   `actual_metar.init`).
+3. If `Saved Games\DCS\real-metar\` exists and `\actual-metar\` does
+   **not** exist yet, **move** the whole folder (not copy-then-delete) —
+   this preserves `custom_icaos.lua` (user data) untouched, and `lib\` gets
+   overwritten right after with the bundled payload anyway. If both folders
+   already exist (repeated reinstall), neither is touched — the new one is
+   assumed authoritative and the old one is left alone just in case.
+
+Tested end-to-end in an isolated sandbox that reproduces the exact prior
+real state (old marker + `modules\real_metar\` with a file + a
+`Saved Games\...\real-metar\` with `custom_icaos.lua` and an old `ssl.lua`):
+after `install()`, the old modules folder is gone, the new marker appears
+exactly once (the old one, zero times), `custom_icaos.lua` survives with its
+content intact, and `lib\` ends up with the real payload (not the dummy
+`ssl.lua`). See the safe-testing discipline below.
+
+`VERSION` bumped to `0.2.0` (a rename is a naming-compatibility-breaking
+change, even though migration makes it transparent to the user).
 
 ## Reproducible CI builds (`.github/workflows/build.yml`)
 
@@ -210,7 +253,7 @@ public repo. Credit and detail live in `luasec_payload/ATTRIBUTION.txt`.
 
 `install_luasec()` (same name in `installer.py`/`installer_en.py`,
 `Install-LuaSec` in `install.ps1`) does two copies:
-- `luasec_payload/lib/*` → `Saved Games\DCS\real-metar\lib\` (recursive,
+- `luasec_payload/lib/*` → `Saved Games\DCS\actual-metar\lib\` (recursive,
   because of `ssl/https.lua`). `lib_path.lua` already looked here first
   before falling back to `dcs-sms\lib\`, so no `.lua` needed changing.
 - `luasec_payload/bin/*` → `<DCS>\bin\` and `<DCS>\bin-mt\`, whichever
@@ -226,7 +269,7 @@ could in theory flag these new DLLs in `bin\`. Full reasoning (why this
 hasn't caused real problems in practice) is in the public READMEs'
 "Requirements" section.
 
-Uninstalling still doesn't touch `Saved Games\DCS\real-metar\lib\` or the
+Uninstalling still doesn't touch `Saved Games\DCS\actual-metar\lib\` or the
 `bin\`/`bin-mt\` DLLs — same convention `dcs-sms` already follows of not
 deleting anything that looks like user data on uninstall. Nobody has asked
 for the opposite.
@@ -238,7 +281,7 @@ doesn't distinguish "test mode" — it finds the machine's real install just
 as readily as a real one. During development this actually caused a test
 to accidentally touch the real install (it deleted the modules folder and
 came close to duplicating the patch). When testing either installer
-against a fake folder, always seed `%AppData%\real-metar\config.json` with
+against a fake folder, always seed `%AppData%\actual-metar\config.json` with
 a clearly fake path *before* running it, and verify with a debug call to
 `resolve_dcs_path()` that it returns that fake path before letting the
 installer touch anything.

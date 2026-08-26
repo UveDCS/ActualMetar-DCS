@@ -1,9 +1,9 @@
-# REAL METAR
+# ACTUAL METAR
 
 *[Read in English](README.md)*
 
-Un **mod para el Mission Editor de DCS World** que añade una pestaña **REAL
-METAR** en la barra de menú superior. Elige un mapa (o escribe cualquier
+Un **mod para el Mission Editor de DCS World** que añade una pestaña
+**ACTUAL METAR** en la barra de menú superior. Elige un mapa (o escribe cualquier
 ICAO), obtén el METAR real de ese aeropuerto y aplícalo directamente a la
 misión que tengas abierta —clima y, opcionalmente, fecha y hora— con un
 clic. Sin app externa, sin navegador, sin servidor que arrancar: todo vive
@@ -32,11 +32,11 @@ de menú separada, ficheros separados).
   ICAO que elijas — no se envía nada a ningún otro sitio.
 - **Qué toca exactamente en tu sistema** al instalar (nada más, en ningún
   otro sitio):
-  - `<DCS>\MissionEditor\modules\real_metar\` — los ficheros del mod.
+  - `<DCS>\MissionEditor\modules\actual_metar\` — los ficheros del mod.
   - `<DCS>\MissionEditor\MissionEditor.lua` — una línea añadida entre
-    marcadores propios, con backup automático (`.real-metar.bak`) antes de
+    marcadores propios, con backup automático (`.actual-metar.bak`) antes de
     tocarlo.
-  - `Saved Games\DCS\real-metar\` — LuaSec y tus ICAOs personalizados.
+  - `Saved Games\DCS\actual-metar\` — LuaSec y tus ICAOs personalizados.
   - `<DCS>\bin\` y `\bin-mt\` — 3 DLLs de LuaSec/OpenSSL para que funcione
     el HTTPS (ver la nota sobre Integrity Check en
     [Requisitos](#requisitos)).
@@ -84,7 +84,7 @@ de menú separada, ficheros separados).
 - **LuaSec**, para el fetch por HTTPS — DCS trae LuaSocket pero no LuaSec.
   **Incluido automáticamente**: el instalador ya copia todo lo necesario, no
   hay que descargar ni colocar nada a mano. Como parte de esto, instalar
-  REAL METAR copia unos pocos ficheros de soporte (LuaSec/OpenSSL) en tu
+  ACTUAL METAR copia unos pocos ficheros de soporte (LuaSec/OpenSSL) en tu
   propia instalación de DCS (`bin\` y `bin-mt\`), no solo en `Saved Games`.
   - Este build de LuaSec/OpenSSL viene originalmente del proyecto
     [`dcs-sms`](https://github.com/nielsvaes/dcs-sms) (LuaSec es MIT,
@@ -98,14 +98,14 @@ de menú separada, ficheros separados).
 
 ## Instalación
 
-Descarga el último `real-metar.exe` desde la página de
+Descarga el último `actual-metar.exe` desde la página de
 [Releases](../../releases) (o compílalo tú mismo, ver
 [`DEVELOPMENT.md`](DEVELOPMENT.md)) y ejecútalo. Verás un menú numerado,
 mismo estilo que `dcs-sms.exe`:
 
 ```
-1. Instalar o actualizar REAL METAR
-2. Desinstalar REAL METAR
+1. Instalar o actualizar ACTUAL METAR
+2. Desinstalar ACTUAL METAR
 3. Fijar la ruta de instalación de DCS World a mano
 q. Salir
 ```
@@ -121,7 +121,7 @@ cacheada de `dcs-sms` si la tienes); si no la encuentra, usa antes la opción
 
 Después **reinicia DCS World por completo** —no solo el Mission Editor, todo
 el juego— porque `MissionEditor.lua` solo se carga una vez por arranque.
-Abre el Mission Editor: **REAL METAR** debería aparecer en la barra de menú
+Abre el Mission Editor: **ACTUAL METAR** debería aparecer en la barra de menú
 superior, junto a Archivo/Edición/Ver/...
 
 **Una actualización de DCS me sobrescribió la instalación / desapareció el
@@ -134,7 +134,7 @@ mod y vuelve a parchear si hace falta.
 ## Uso
 
 1. Abre una misión en el Mission Editor.
-2. **REAL METAR → Panel METAR** en el menú superior.
+2. **ACTUAL METAR → Panel METAR** en el menú superior.
 3. Elige tu mapa en el desplegable (o escribe un ICAO directamente), luego
    **Obtener METAR**. Verás el texto crudo del METAR y un resumen de lo que
    se va a escribir (viento, QNH, temperatura, nubes, visibilidad, niebla).
@@ -176,11 +176,11 @@ mod y vuelve a parchear si hace falta.
 
 Se puede escribir cualquier ICAO a mano sin importar el mapa. Los
 aeropuertos de referencia y sus zonas horarias están en
-`lua/real_metar/dcs_maps.lua` — fácil de ampliar.
+`lua/actual_metar/dcs_maps.lua` — fácil de ampliar.
 
 ## Solución de problemas
 
-- **No aparece el menú "REAL METAR" tras instalar** — reiniciaste el
+- **No aparece el menú "ACTUAL METAR" tras instalar** — reiniciaste el
   Mission Editor pero no todo DCS. Cierra DCS World del todo y vuelve a
   abrirlo.
 - **El mapa/huso horario sale como "no reconocido"** — el string interno
@@ -190,7 +190,7 @@ aeropuertos de referencia y sus zonas horarias están en
 - **"Obtener METAR" da un error de paquete que falta** — necesitas el
   paquete LuaSec, mira [Requisitos](#requisitos) arriba.
 - **No pasa nada, sin ningún error** — revisa
-  `<Saved Games>\DCS\Logs\dcs.log` buscando líneas etiquetadas `real_metar`.
+  `<Saved Games>\DCS\Logs\dcs.log` buscando líneas etiquetadas `actual_metar`.
 
 ## Créditos
 

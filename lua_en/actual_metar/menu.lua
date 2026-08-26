@@ -1,4 +1,4 @@
--- menu.lua — registers the top-level "REAL METAR" menu entry, its own and
+-- menu.lua — registers the top-level "ACTUAL METAR" menu entry, its own and
 -- independent from DCS-SMS's (if that's also installed, they coexist fine:
 -- just one more item gets added to the bar). Identical technique to
 -- dcs_sms_me/menu.lua (menuBar:insertItem), documented there as discovered
@@ -7,13 +7,13 @@
 local M = {}
 
 local function log_err(msg)
-    pcall(function() _G.log.write("real_metar", _G.log.ERROR or 1, tostring(msg)) end)
+    pcall(function() _G.log.write("actual_metar", _G.log.ERROR or 1, tostring(msg)) end)
 end
 
 local function add_top_level_menu()
     local ok, mb = pcall(require, "me_menubar")
     if not ok or not mb or not mb.menuBar then return false end
-    if mb._real_metar_top_added then return true end
+    if mb._actual_metar_top_added then return true end
 
     local menu_bar = mb.menuBar
     if type(menu_bar.insertItem) ~= "function" then return false end
@@ -47,12 +47,12 @@ local function add_top_level_menu()
         if sib and sib.getSkin and item.setSkin then item:setSkin(sib:getSkin()) end
     end)
     item.func = function()
-        local ok2, err2 = pcall(function() require("real_metar.window").toggle() end)
+        local ok2, err2 = pcall(function() require("actual_metar.window").toggle() end)
         if not ok2 then log_err("window.toggle failed: " .. tostring(err2)) end
     end
 
     local bar_item
-    local ok_bar, bar_err = pcall(function() bar_item = MenuBarItem.new("REAL METAR", menu) end)
+    local ok_bar, bar_err = pcall(function() bar_item = MenuBarItem.new("ACTUAL METAR", menu) end)
     if not ok_bar or not bar_item then
         log_err("MenuBarItem.new failed: " .. tostring(bar_err))
         return false
@@ -64,14 +64,14 @@ local function add_top_level_menu()
     end)
     pcall(function() menu_bar:insertItem(bar_item) end)
 
-    mb._real_metar_top_added = true
+    mb._actual_metar_top_added = true
     return true
 end
 
 local function patch_menubar_show()
     local ok, mb = pcall(require, "me_menubar")
     if not ok or not mb or type(mb.show) ~= "function" then return false end
-    if mb._real_metar_show_patched then return true end
+    if mb._actual_metar_show_patched then return true end
 
     local orig_show = mb.show
     mb.show = function(...)
@@ -79,14 +79,14 @@ local function patch_menubar_show()
         pcall(add_top_level_menu)
         return result
     end
-    mb._real_metar_show_patched = true
+    mb._actual_metar_show_patched = true
     return true
 end
 
 function M.install()
     if add_top_level_menu() then return "menu" end
     if patch_menubar_show() then return "menu" end
-    log_err("me_menubar inaccessible - could not register REAL METAR menu")
+    log_err("me_menubar inaccessible - could not register ACTUAL METAR menu")
     return "failed"
 end
 

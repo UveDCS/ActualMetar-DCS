@@ -23,23 +23,23 @@ jobs:
 
       - name: Build Spanish installer
         working-directory: installer
-        run: python -m PyInstaller --onefile --console --name real-metar --add-data "../lua/real_metar;real_metar" --add-data "../luasec_payload;luasec" --distpath ./dist --workpath ./build --specpath . installer.py
+        run: python -m PyInstaller --onefile --console --name actual-metar --add-data "../lua/actual_metar;actual_metar" --add-data "../luasec_payload;luasec" --distpath ./dist --workpath ./build --specpath . installer.py
 
       - name: Build English installer
         working-directory: installer
-        run: python -m PyInstaller --onefile --console --name real-metar-en --add-data "../lua_en/real_metar;real_metar" --add-data "../luasec_payload;luasec" --distpath ./dist --workpath ./build_en --specpath . installer_en.py
+        run: python -m PyInstaller --onefile --console --name actual-metar-en --add-data "../lua_en/actual_metar;actual_metar" --add-data "../luasec_payload;luasec" --distpath ./dist --workpath ./build_en --specpath . installer_en.py
 
       - name: Package distribution zips
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path staging/Instalacion-ES, staging/Installation-EN | Out-Null
 
-          Copy-Item installer/dist/real-metar.exe staging/Instalacion-ES/real-metar.exe
+          Copy-Item installer/dist/actual-metar.exe staging/Instalacion-ES/actual-metar.exe
           Copy-Item README.es.md staging/Instalacion-ES/README.md
           Copy-Item DEVELOPMENT.md staging/Instalacion-ES/DEVELOPMENT.md
           Copy-Item luasec_payload/ATTRIBUTION.txt staging/Instalacion-ES/LUASEC_ATTRIBUTION.txt
 
-          Copy-Item installer/dist/real-metar-en.exe staging/Installation-EN/real-metar.exe
+          Copy-Item installer/dist/actual-metar-en.exe staging/Installation-EN/actual-metar.exe
           Copy-Item README.md staging/Installation-EN/README.md
           Copy-Item DEVELOPMENT.en.md staging/Installation-EN/DEVELOPMENT.md
           Copy-Item luasec_payload/ATTRIBUTION.txt staging/Installation-EN/LUASEC_ATTRIBUTION.txt
@@ -50,7 +50,7 @@ jobs:
       - name: Compute SHA256 checksums
         shell: pwsh
         run: |
-          $files = "installer/dist/real-metar.exe", "installer/dist/real-metar-en.exe", "Instalacion-ES.zip", "Installation-EN.zip"
+          $files = "installer/dist/actual-metar.exe", "installer/dist/actual-metar-en.exe", "Instalacion-ES.zip", "Installation-EN.zip"
           Get-FileHash -Path $files -Algorithm SHA256 |
             ForEach-Object { "$($_.Hash.ToLower())  $(Split-Path -Leaf $_.Path)" } |
             Out-File -Encoding ascii SHA256SUMS.txt
@@ -62,10 +62,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "${{ github.ref_name }}" \
-            "installer/dist/real-metar.exe" \
-            "installer/dist/real-metar-en.exe" \
+            "installer/dist/actual-metar.exe" \
+            "installer/dist/actual-metar-en.exe" \
             "Instalacion-ES.zip" \
             "Installation-EN.zip" \
             "SHA256SUMS.txt" \
-            --title "REAL METAR ${{ github.ref_name }}" \
+            --title "ACTUAL METAR ${{ github.ref_name }}" \
             --generate-notes

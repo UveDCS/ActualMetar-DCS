@@ -1,4 +1,4 @@
--- paths.lua — shared path utilities (Saved Games\DCS\real-metar\).
+-- paths.lua — utilidades de rutas compartidas (Saved Games\DCS\actual-metar\).
 
 local M = {}
 
@@ -8,8 +8,8 @@ function M.saved_games_dir()
         local ok2, dir = pcall(lfs.writedir)
         if ok2 and dir then return dir end
     end
-    -- lfs.writedir() normally returns <Saved Games>\DCS\ directly when
-    -- called from inside the DCS/ME process.
+    -- lfs.writedir() normalmente devuelve <Saved Games>\DCS\ directamente
+    -- cuando se llama desde dentro del proceso de DCS/ME.
     return nil
 end
 
@@ -20,11 +20,11 @@ function M.dir_exists(path)
     return ok2 and attr ~= nil and attr.mode == "directory"
 end
 
--- own_dir() -> <Saved Games>\DCS\real-metar\ (creates it if missing).
+-- own_dir() -> <Saved Games>\DCS\actual-metar\ (la crea si no existe).
 function M.own_dir()
     local base = M.saved_games_dir()
     if not base then return nil end
-    local dir = base .. "real-metar\\"
+    local dir = base .. "actual-metar\\"
     if not M.dir_exists(dir) then
         local ok, lfs = pcall(require, "lfs")
         if ok and lfs and lfs.mkdir then pcall(lfs.mkdir, dir) end

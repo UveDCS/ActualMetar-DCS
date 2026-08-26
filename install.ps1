@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
-    Instala/actualiza/desinstala el mod REAL METAR para el Mission Editor de DCS World.
+    Instala/actualiza/desinstala el mod ACTUAL METAR para el Mission Editor de DCS World.
 
 .DESCRIPTION
-    Copia los ficheros Lua de este proyecto a <DCS install>\MissionEditor\modules\real_metar\
-    y agrega (si no esta ya) un require('real_metar.init') al final de
+    Copia los ficheros Lua de este proyecto a <DCS install>\MissionEditor\modules\actual_metar\
+    y agrega (si no esta ya) un require('actual_metar.init') al final de
     <DCS install>\MissionEditor\MissionEditor.lua, delimitado por marcadores propios
-    (REAL-METAR-BEGIN/END). No toca ni depende de dcs-sms; ambos pueden convivir.
+    (ACTUAL-METAR-BEGIN/END). No toca ni depende de dcs-sms; ambos pueden convivir.
 
     Hay que volver a ejecutar este script cada vez que una actualizacion oficial de
     DCS World sobrescriba MissionEditor.lua (lo hace de vez en cuando). Relanzarlo es
@@ -32,8 +32,13 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$BeginMarker = "-- REAL-METAR-BEGIN (no editar a mano; gestionado por install.ps1)"
-$EndMarker   = "-- REAL-METAR-END"
+$BeginMarker = "-- ACTUAL-METAR-BEGIN (no editar a mano; gestionado por install.ps1)"
+$EndMarker   = "-- ACTUAL-METAR-END"
+
+# Nombres antiguos (el proyecto se llamaba "REAL METAR"). Solo para migrar
+# instalaciones ya existentes a los nombres nuevos; ya no se generan.
+$OldBeginMarker = "-- REAL-METAR-BEGIN (no editar a mano; gestionado por install.ps1)"
+$OldEndMarker   = "-- REAL-METAR-END"
 
 function Find-DcsPath {
     if ($DcsPath) { return $DcsPath }
@@ -105,7 +110,14 @@ function Install-LuaSec {
     }
 
     $savedGames = Find-SavedGamesPath -Dcs $Dcs
-    $libDst = Join-Path $savedGames "real-metar\lib"
+    $ownDir = Join-Path $savedGames "actual-metar"
+    $oldOwnDir = Join-Path $savedGames "real-metar"
+    if ((Test-Path $oldOwnDir) -and (-not (Test-Path $ownDir))) {
+        Move-Item -Path $oldOwnDir -Destination $ownDir
+        Write-Host "Carpeta antigua 'real-metar' migrada a 'actual-metar': $ownDir" -ForegroundColor Green
+    }
+
+    $libDst = Join-Path $ownDir "lib"
     New-Item -ItemType Directory -Force -Path $libDst | Out-Null
     Copy-Item -Path (Join-Path $libSrc "*") -Destination $libDst -Recurse -Force
     Write-Host "LuaSec (HTTPS) instalado en: $libDst" -ForegroundColor Green
@@ -130,8 +142,9 @@ if (-not $dcs) {
 }
 
 $meLua = Join-Path $dcs "MissionEditor\MissionEditor.lua"
-$modulesDir = Join-Path $dcs "MissionEditor\modules\real_metar"
-$sourceDir = Join-Path $PSScriptRoot "lua\real_metar"
+$modulesDir = Join-Path $dcs "MissionEditor\modules\actual_metar"
+$oldModulesDir = Join-Path $dcs "MissionEditor\modules\real_metar"
+$sourceDir = Join-Path $PSScriptRoot "lua\actual_metar"
 
 Write-Host "DCS World: $dcs"
 
@@ -142,9 +155,9 @@ if ($Uninstall) {
         if ($content -match $pattern) {
             $newContent = [regex]::Replace($content, $pattern, "")
             Set-Content -Path $meLua -Value $newContent -NoNewline
-            Write-Host "Bloque REAL-METAR quitado de MissionEditor.lua." -ForegroundColor Green
+            Write-Host "Bloque ACTUAL-METAR quitado de MissionEditor.lua." -ForegroundColor Green
         } else {
-            Write-Host "MissionEditor.lua no tenia el bloque REAL-METAR (nada que quitar)."
+            Write-Host "MissionEditor.lua no tenia el bloque ACTUAL-METAR (nada que quitar)."
         }
     }
     if (Test-Path $modulesDir) {
@@ -160,6 +173,11 @@ if (-not (Test-Path $sourceDir)) {
     exit 1
 }
 
+if (Test-Path $oldModulesDir) {
+    Remove-Item -Recurse -Force $oldModulesDir
+    Write-Host "Carpeta antigua 'real_metar' eliminada (proyecto renombrado a 'actual_metar'): $oldModulesDir" -ForegroundColor Green
+}
+
 # 1) Copiar/actualizar los ficheros Lua (siempre, sea instalacion nueva o refresco)
 New-Item -ItemType Directory -Force -Path $modulesDir | Out-Null
 Copy-Item -Path (Join-Path $sourceDir "*.lua") -Destination $modulesDir -Force
@@ -171,17 +189,23 @@ if (-not (Test-Path $meLua)) {
     exit 1
 }
 $content = Get-Content -Raw -Path $meLua
+$oldPattern = [regex]::Escape($OldBeginMarker) + "(.|\n|\r)*?" + [regex]::Escape($OldEndMarker)
+if ($content -match $oldPattern) {
+    $content = [regex]::Replace($content, $oldPattern, "")
+    Set-Content -Path $meLua -Value $content -NoNewline
+    Write-Host "Bloque antiguo REAL-METAR quitado de MissionEditor.lua (proyecto renombrado a ACTUAL-METAR)." -ForegroundColor Green
+}
 if ($content -notmatch [regex]::Escape($BeginMarker)) {
-    $backup = "$meLua.real-metar.bak"
+    $backup = "$meLua.actual-metar.bak"
     if (-not (Test-Path $backup)) {
         Copy-Item -Path $meLua -Destination $backup
         Write-Host "Backup creado: $backup"
     }
-    $block = "`r`n$BeginMarker`r`nrequire('real_metar.init')`r`n$EndMarker`r`n"
+    $block = "`r`n$BeginMarker`r`nrequire('actual_metar.init')`r`n$EndMarker`r`n"
     Add-Content -Path $meLua -Value $block -NoNewline
     Write-Host "MissionEditor.lua parcheado (require agregado)." -ForegroundColor Green
 } else {
-    Write-Host "MissionEditor.lua ya tenia el require de REAL METAR (no se toca)."
+    Write-Host "MissionEditor.lua ya tenia el require de ACTUAL METAR (no se toca)."
 }
 
 Write-Host ""
@@ -190,7 +214,7 @@ Install-LuaSec -Dcs $dcs
 Write-Host ""
 Write-Host "Instalacion completa." -ForegroundColor Green
 Write-Host "Reinicia DCS World POR COMPLETO (no solo el Mission Editor) y abre el editor:"
-Write-Host "deberia aparecer REAL METAR en la barra de menu superior."
+Write-Host "deberia aparecer ACTUAL METAR en la barra de menu superior."
 Write-Host ""
 Write-Host "Nota: se han copiado unos ficheros de soporte (LuaSec/OpenSSL) en tu instalacion"
 Write-Host "de DCS ('bin\' y 'bin-mt\') para que el fetch por HTTPS funcione sin pasos extra."

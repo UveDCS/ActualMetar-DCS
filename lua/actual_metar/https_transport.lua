@@ -3,19 +3,19 @@
 -- de dcs-sms (tools/me-mod/lua/dcs_sms_me/community_transport.lua):
 -- TCP crudo de LuaSocket + TLS de LuaSec hechos a mano en modo no
 -- bloqueante, hablando HTTP/1.0, avanzando UN paso por poll() (bombeado
--- por real_metar.ticker una vez por tick de UpdateManager via corutina).
+-- por actual_metar.ticker una vez por tick de UpdateManager via corutina).
 --
--- Instrumentado con log.write("real_metar", ...) en cada transicion de
+-- Instrumentado con log.write("actual_metar", ...) en cada transicion de
 -- stage y con un timeout por RELOJ (no por numero de polls, que depende de
 -- lo rapido que tiquee UpdateManager y podia tardar minutos en saltar) para
 -- poder diagnosticar exactamente donde se queda colgado si pasa.
 
-local lib_path = require("real_metar.lib_path")
+local lib_path = require("actual_metar.lib_path")
 
 local M = {}
 
 local function log_info(msg)
-    pcall(function() _G.log.write("real_metar", _G.log.INFO or 3, tostring(msg)) end)
+    pcall(function() _G.log.write("actual_metar", _G.log.INFO or 3, tostring(msg)) end)
 end
 
 local ssl
@@ -58,7 +58,7 @@ function M.request(url)
     local mod = load_ssl()
     if not mod then
         return {
-            poll = function() return "error", "LuaSec no instalado (ver README de real-metar)" end,
+            poll = function() return "error", "LuaSec no instalado (ver README de actual-metar)" end,
             debug = function() return "sin LuaSec" end,
         }
     end
@@ -82,7 +82,7 @@ function M.request(url)
     local stage = "connect"
     local sock, conn
     local request = string.format(
-        "GET %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: real-metar\r\nAccept: application/json\r\nConnection: close\r\n\r\n",
+        "GET %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: actual-metar\r\nAccept: application/json\r\nConnection: close\r\n\r\n",
         path, host)
     local sent = 0
     local chunks = {}

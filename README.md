@@ -1,9 +1,9 @@
-# REAL METAR
+# ACTUAL METAR
 
 *[Leer en español](README.es.md)*
 
-A **Mission Editor mod for DCS World** that adds a **REAL METAR** tab to the
-top menu bar. Pick a map (or type any ICAO), pull the real-world METAR for
+A **Mission Editor mod for DCS World** that adds an **ACTUAL METAR** tab to
+the top menu bar. Pick a map (or type any ICAO), pull the real-world METAR for
 that airport, and apply it straight to the mission you have open — weather,
 and optionally date/time — with one click. No external app, no browser, no
 server to start: it's all inside DCS.
@@ -30,10 +30,10 @@ menu entry, separate files).
   whatever ICAO you pick — nothing is sent anywhere else.
 - **Exactly what it touches on your system** when you install (nothing
   else, nowhere else):
-  - `<DCS>\MissionEditor\modules\real_metar\` — the mod's files.
+  - `<DCS>\MissionEditor\modules\actual_metar\` — the mod's files.
   - `<DCS>\MissionEditor\MissionEditor.lua` — one line added between its own
-    markers, with an automatic backup (`.real-metar.bak`) taken first.
-  - `Saved Games\DCS\real-metar\` — LuaSec and your custom ICAOs.
+    markers, with an automatic backup (`.actual-metar.bak`) taken first.
+  - `Saved Games\DCS\actual-metar\` — LuaSec and your custom ICAOs.
   - `<DCS>\bin\` and `\bin-mt\` — 3 LuaSec/OpenSSL DLLs so HTTPS works (see
     the Integrity Check note under [Requirements](#requirements)).
 - **Why does Windows warn when opening the `.exe`?** SmartScreen flags any
@@ -77,7 +77,7 @@ menu entry, separate files).
 - **LuaSec**, for the HTTPS fetch — DCS ships LuaSocket but not LuaSec.
   **Bundled automatically**: the installer already copies everything it
   needs, nothing to download or place by hand. As part of that, installing
-  REAL METAR copies a few support files (LuaSec/OpenSSL) into your DCS
+  ACTUAL METAR copies a few support files (LuaSec/OpenSSL) into your DCS
   install itself (`bin\` and `bin-mt\`), not just into `Saved Games`.
   - This LuaSec/OpenSSL build originally comes from the
     [`dcs-sms`](https://github.com/nielsvaes/dcs-sms) project (LuaSec is
@@ -90,13 +90,13 @@ menu entry, separate files).
 
 ## Installing
 
-Download the latest `real-metar.exe` from the [Releases](../../releases)
+Download the latest `actual-metar.exe` from the [Releases](../../releases)
 page (or build it yourself, see [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md)) and run
 it. You'll get a numbered menu, same style as `dcs-sms.exe`:
 
 ```
-1. Install or update REAL METAR
-2. Uninstall REAL METAR
+1. Install or update ACTUAL METAR
+2. Uninstall ACTUAL METAR
 3. Set the DCS World install path manually
 q. Quit
 ```
@@ -112,7 +112,7 @@ the folder that contains `MissionEditor\` and `bin\`.
 
 Then **fully restart DCS World** — not just the Mission Editor, the whole
 game — because `MissionEditor.lua` only loads once per launch. Open the
-Mission Editor: **REAL METAR** should now be in the top menu bar next to
+Mission Editor: **ACTUAL METAR** should now be in the top menu bar next to
 File/Edit/View/…
 
 **A DCS update overwrote my install / the menu disappeared:** just re-run
@@ -124,7 +124,7 @@ anything, it just refreshes the mod files and re-patches if needed.
 ## Using it
 
 1. Open a mission in the Mission Editor.
-2. **REAL METAR → METAR Panel** in the top menu.
+2. **ACTUAL METAR → METAR Panel** in the top menu.
 3. Pick your map from the dropdown (or type an ICAO directly), then
    **Get METAR**. You'll see the raw METAR text plus a summary of what
    will be written (wind, QNH, temperature, clouds, visibility, fog).
@@ -162,11 +162,11 @@ anything, it just refreshes the mod files and re-patches if needed.
 | Germany Cold War | ETAR (Ramstein) |
 
 Any ICAO can be typed manually regardless of map. Reference airports and
-their timezones live in `lua/real_metar/dcs_maps.lua` — easy to extend.
+their timezones live in `lua/actual_metar/dcs_maps.lua` — easy to extend.
 
 ## Troubleshooting
 
-- **No "REAL METAR" menu after installing** — you restarted the Mission
+- **No "ACTUAL METAR" menu after installing** — you restarted the Mission
   Editor but not all of DCS. Fully quit DCS World and launch it again.
 - **The map/timezone shows "not recognized"** — the mission's internal
   `theatre` string isn't in our lookup table yet. It still works fine, just
@@ -175,7 +175,7 @@ their timezones live in `lua/real_metar/dcs_maps.lua` — easy to extend.
 - **"Get METAR" errors about a missing package** — you need the LuaSec
   payload, see [Requirements](#requirements) above.
 - **Nothing happens, no error at all** — check
-  `<Saved Games>\DCS\Logs\dcs.log` for lines tagged `real_metar`.
+  `<Saved Games>\DCS\Logs\dcs.log` for lines tagged `actual_metar`.
 
 ## Credits
 

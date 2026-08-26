@@ -2,20 +2,20 @@
 -- (single-threaded PUC Lua) doesn't freeze. Direct port of dcs-sms's
 -- technique (tools/me-mod/lua/dcs_sms_me/community_transport.lua): raw
 -- LuaSocket TCP + LuaSec TLS done by hand in non-blocking mode, speaking
--- HTTP/1.0, advancing ONE step per poll() (pumped by real_metar.ticker
+-- HTTP/1.0, advancing ONE step per poll() (pumped by actual_metar.ticker
 -- once per UpdateManager tick via a coroutine).
 --
--- Instrumented with log.write("real_metar", ...) on every stage transition
+-- Instrumented with log.write("actual_metar", ...) on every stage transition
 -- and with a WALL-CLOCK timeout (not a poll-count one, which depends on
 -- how fast UpdateManager ticks and could take minutes to trigger) so we
 -- can diagnose exactly where it gets stuck if it ever does.
 
-local lib_path = require("real_metar.lib_path")
+local lib_path = require("actual_metar.lib_path")
 
 local M = {}
 
 local function log_info(msg)
-    pcall(function() _G.log.write("real_metar", _G.log.INFO or 3, tostring(msg)) end)
+    pcall(function() _G.log.write("actual_metar", _G.log.INFO or 3, tostring(msg)) end)
 end
 
 local ssl
@@ -58,7 +58,7 @@ function M.request(url)
     local mod = load_ssl()
     if not mod then
         return {
-            poll = function() return "error", "LuaSec not installed (see real-metar's README)" end,
+            poll = function() return "error", "LuaSec not installed (see actual-metar's README)" end,
             debug = function() return "no LuaSec" end,
         }
     end
@@ -82,7 +82,7 @@ function M.request(url)
     local stage = "connect"
     local sock, conn
     local request = string.format(
-        "GET %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: real-metar\r\nAccept: application/json\r\nConnection: close\r\n\r\n",
+        "GET %s HTTP/1.0\r\nHost: %s\r\nUser-Agent: actual-metar\r\nAccept: application/json\r\nConnection: close\r\n\r\n",
         path, host)
     local sent = 0
     local chunks = {}

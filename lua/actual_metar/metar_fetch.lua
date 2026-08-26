@@ -1,11 +1,11 @@
--- metar_fetch.lua — orchestrates the METAR download+calculation without
--- blocking the editor: a coroutine that keeps yielding ('pending') until
--- the transport finishes. The caller must invoke Job:step() once per tick
--- (see ticker.lua), same as dcs_sms_me.community_fetch.
+-- metar_fetch.lua — orquesta la descarga+calculo del METAR sin bloquear el
+-- editor: una corutina que va cediendo ('pending') hasta que el transporte
+-- termina. El llamador debe invocar Job:step() una vez por tick (ver
+-- ticker.lua), igual que dcs_sms_me.community_fetch.
 
-local transport = require("real_metar.https_transport")
-local json = require("real_metar.json")
-local weather_calc = require("real_metar.weather_calc")
+local transport = require("actual_metar.https_transport")
+local json = require("actual_metar.json")
+local weather_calc = require("actual_metar.weather_calc")
 
 local M = {}
 local Job = {}
@@ -29,7 +29,7 @@ function Job:start(icao)
     icao = tostring(icao or ""):upper():gsub("%s+", "")
     if not icao:match("^[A-Z0-9]+$") or #icao < 3 or #icao > 4 then
         self.state = "error"
-        self.error = "Invalid ICAO: " .. tostring(icao)
+        self.error = "ICAO invalido: " .. tostring(icao)
         return
     end
 
@@ -50,13 +50,13 @@ function Job:start(icao)
         end
 
         local ok, decoded = pcall(json.decode, body)
-        if not ok then error("invalid response from aviationweather.gov: " .. tostring(decoded), 0) end
+        if not ok then error("respuesta invalida de aviationweather.gov: " .. tostring(decoded), 0) end
         if type(decoded) ~= "table" or decoded[1] == nil then
-            error("no METAR available for " .. icao, 0)
+            error("sin METAR disponible para " .. icao, 0)
         end
 
         local ok2, w = pcall(weather_calc.normalize, decoded[1])
-        if not ok2 then error("error computing weather: " .. tostring(w), 0) end
+        if not ok2 then error("error calculando el clima: " .. tostring(w), 0) end
         self.weather = w
     end)
 end

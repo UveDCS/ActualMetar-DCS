@@ -1,12 +1,11 @@
--- weather_calc.lua — puerto directo de metar-dcs-app/metar.py
--- (normalize_for_dcs). Convierte el JSON de aviationweather.gov (ya
--- decodificado a tabla Lua) en los valores listos para escribir en
--- mission.weather. Ver metar-dcs-app/metar.py para toda la justificacion
--- de cada conversion (direccion de viento invertida, lapse rate ISA,
--- prioridad de preset con lluvia, etc.) — aqui solo el codigo, comentarios
--- minimos.
+-- weather_calc.lua — direct port of metar-dcs-app/metar.py
+-- (normalize_for_dcs). Converts the aviationweather.gov JSON (already
+-- decoded into a Lua table) into the values ready to write into
+-- mission.weather. See metar-dcs-app/metar.py for the full justification
+-- of each conversion (reversed wind direction, ISA lapse rate, rain preset
+-- priority, etc.) — here just the code, minimal comments.
 
-local cloud_presets = require("real_metar.cloud_presets")
+local cloud_presets = require("actual_metar.cloud_presets")
 
 local M = {}
 
@@ -47,9 +46,9 @@ local function parse_visibility_sm(visib)
     return 10.0
 end
 
--- Elige la capa de nubes de referencia: si hay precipitacion, la de mayor
--- cobertura; si no, la primera con techo (BKN/OVC); si no hay techo, la
--- primera capa reportada.
+-- Picks the reference cloud layer: if there's precipitation, the one with
+-- the highest coverage; otherwise the first one with a ceiling (BKN/OVC);
+-- if there's no ceiling, the first reported layer.
 local function reference_layer(clouds, precip)
     if not clouds or #clouds == 0 then return nil end
     if precip then
@@ -76,7 +75,7 @@ local MONTH_NAMES = {
     "JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
 }
 
--- report_time viene como "2026-08-23T19:00:00.000Z" (ISO 8601, siempre UTC).
+-- report_time comes as "2026-08-23T19:00:00.000Z" (ISO 8601, always UTC).
 local function build_name_label(icao, report_time)
     if not report_time then return nil end
     local y, mo, d, hh, mi = report_time:match("^(%d+)-(%d+)-(%d+)T(%d+):(%d+)")
@@ -86,13 +85,13 @@ local function build_name_label(icao, report_time)
     return string.format("Real weather - METAR %s %s%s%s %s%sZ", icao or "?", d, mon, y, hh, mi)
 end
 
--- normalize(raw) -> tabla lista para mission_apply.lua
+-- normalize(raw) -> table ready for mission_apply.lua
 function M.normalize(raw)
     local wdir = raw.wdir
     local wspd_kt = raw.wspd or 0
     local wgst_kt = raw.wgst
 
-    if type(wdir) == "string" then wdir = nil end -- "VRB" u otros
+    if type(wdir) == "string" then wdir = nil end -- "VRB" or similar
     local dcs_dir_ground = nil
     if wdir ~= nil then
         dcs_dir_ground = (tonumber(wdir) + 180.0) % 360.0

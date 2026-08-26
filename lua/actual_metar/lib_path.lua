@@ -4,12 +4,12 @@
 -- LuaSec). Mismo mecanismo que usa dcs-sms (ver su README, seccion
 -- "Community prefabs").
 --
--- Busca primero en nuestra propia carpeta (<Saved Games>/DCS/real-metar/lib/)
+-- Busca primero en nuestra propia carpeta (<Saved Games>/DCS/actual-metar/lib/)
 -- y, si no esta, reaprovecha la de dcs-sms si el usuario ya la tiene
 -- instalada (<Saved Games>/DCS/dcs-sms/lib/) — evita pedirle que instale
 -- el mismo payload dos veces.
 
-local paths = require("real_metar.paths")
+local paths = require("actual_metar.paths")
 
 local M = {}
 
@@ -20,7 +20,7 @@ function M.resolve()
     local base = paths.saved_games_dir()
     if not base then return nil end
 
-    local own = base .. "real-metar\\lib\\"
+    local own = base .. "actual-metar\\lib\\"
     local dcs_sms = base .. "dcs-sms\\lib\\"
 
     if paths.dir_exists(own) then
