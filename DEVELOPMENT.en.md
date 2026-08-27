@@ -15,8 +15,11 @@ installer/
   dist/actual-metar-en.exe    — compiled EN binary
 luasec_payload/             — precompiled LuaSec/OpenSSL, bundled into both .exe (see below)
   ATTRIBUTION.txt            — provenance and licenses
-  lib/                       — ssl.lua, ssl/https.lua, cacert.pem, ssl.dll -> Saved Games\DCS\actual-metar\lib\
+  lib/                       — ssl.lua, ssl/https.lua, cacert.pem, ssl.dll -> modules\actual_metar\lib\ (and Saved Games, compat)
   bin/                       — libcrypto-4-x64.dll, libssl-4-x64.dll, lua5.1.dll -> <DCS>\bin\ and \bin-mt\
+ovgme/                       — no-.exe install alternative (see below)
+  build_ovgme_packages.ps1   — builds the two OvGME zips (ES/EN)
+  OVGME_LEEME.txt / OVGME_README.txt — instructions for the one manual step
 lua/actual_metar/            — mod, SPANISH UI (original)
 lua_en/actual_metar/          — mod, ENGLISH UI (translation — see below)
   init.lua                 — bootstrap (loaded from MissionEditor.lua)
@@ -34,9 +37,12 @@ lua_en/actual_metar/          — mod, ENGLISH UI (translation — see below)
   dcs_maps.lua               — ICAO + timezone per map (built-in)
   custom_maps.lua            — user-added/removed ICAOs (persisted)
   paths.lua                  — resolves <Saved Games>\DCS\ (shared by lib_path and custom_maps)
-Instalacion-ES/             — ready-to-distribute package: actual-metar.exe + README.md + DEVELOPMENT.md (es)
-Installation-EN/            — same in English: actual-metar.exe + README.md + DEVELOPMENT.md (en)
 ```
+
+The distribution packages (`Instalacion-ES.zip`, `Installation-EN.zip`,
+`ActualMetar-ES-OvGME.zip`, `ActualMetar-EN-OvGME.zip`) are no longer kept
+in the repo or built by hand — `.github/workflows/build.yml` builds them
+on every tag and publishes them as a Release.
 
 ## `lua/` vs `lua_en/`: two translated copies, not one with i18n
 
@@ -273,6 +279,55 @@ Uninstalling still doesn't touch `Saved Games\DCS\actual-metar\lib\` or the
 `bin\`/`bin-mt\` DLLs — same convention `dcs-sms` already follows of not
 deleting anything that looks like user data on uninstall. Nobody has asked
 for the opposite.
+
+## OvGME package: a no-`.exe` alternative (`ovgme/`)
+
+Motivation: a real user (Max) reported their antivirus (Avast) flagged the
+`.exe` as suspicious during install — same underlying problem as the
+Defender ML detections documented below. Rather than wait solely on
+SignPath signing, an install path was added that depends on no compiled
+executable at all: a package for
+[OvGME](https://wiki.hoggitworld.com/view/OVGME)/JSGME, which only copies
+plain files inside the DCS folder (nothing an antivirus could mistake for
+a dropper).
+
+**Architecture change needed to make this work**: OvGME can only manage
+one target folder (the DCS install), it can't touch `Saved Games`. Before
+this, the LuaSec payload lived in `Saved Games\DCS\actual-metar\lib\`,
+outside the reach of a single OvGME package. `lib_path.lua` (both
+languages) was changed to look **inside its own module folder** first
+(`MissionEditor\modules\actual_metar\lib\`), computed via
+`debug.getinfo(1, "S").source` instead of assuming a fixed path — so it
+works the same whether the mod arrived via the `.exe` or was copied by
+hand via OvGME. The full search order is now: (1) own module folder, (2)
+`Saved Games\...\actual-metar\lib\` (compatibility with `.exe` installs
+from before this change), (3) `Saved Games\...\dcs-sms\lib\` (reuse
+dcs-sms's payload). `install_luasec()` in all three installers now copies
+the payload to **both of the first two locations at once**, so installing
+via the `.exe` leaves things ready for either resolution path. Tested with
+the local Lua 5.1 interpreter simulating OvGME's folder layout (with a
+fake `lfs`) before touching the installers.
+
+**The one thing OvGME can't automate**: the `MissionEditor.lua` patch.
+Shipping a full replacement of that file was ruled out (it goes stale on
+DCS updates, and clobbers `dcs-sms`'s own patch if the user has that too)
+— instead, the package ships an `OVGME_LEEME.txt`/`OVGME_README.txt` with
+the exact 3 lines to paste by hand, once (same `ACTUAL-METAR-BEGIN/END`
+marker the other installers use, so it's indistinguishable from an
+automatic patch).
+
+`ovgme/build_ovgme_packages.ps1` builds the two zips
+(`ActualMetar-ES-OvGME.zip` / `ActualMetar-EN-OvGME.zip`): each mirrors
+`MissionEditor\modules\actual_metar\` (including `lib\`) + `bin\` +
+`bin-mt\` + `version.txt` + the instructions file, with the zip's top-level
+folder named exactly like the zip itself (OvGME's mandatory naming rule).
+Called both by hand during development and by
+`.github/workflows/build.yml` on every tag — same reproducible process as
+the `.exe`s. Known quirk: if the user's DCS install isn't the MT build,
+the package still creates a `bin-mt\` folder with 3 unused DLLs (harmless,
+DCS never reads it if it doesn't need it) — a limitation of OvGME's
+"folder mirror" model, which can't conditionally skip copying based on
+whether `bin-mt\` already exists.
 
 ## Caution when testing the installers on this machine
 

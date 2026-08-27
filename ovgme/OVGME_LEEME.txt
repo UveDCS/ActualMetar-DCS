@@ -1,0 +1,49 @@
+ACTUAL METAR — paquete OvGME
+=============================
+
+Este paquete instala los ficheros del mod mediante OvGME (o JSGME), sin
+ningun .exe de por medio — pensado para quien prefiera evitar el aviso de
+antivirus que a veces salta con el instalador (ver mas abajo el porque).
+
+Como OvGME solo puede copiar ficheros dentro de la carpeta de DCS, hay UN
+PASO MANUAL que no puede automatizar: añadir una linea a MissionEditor.lua.
+Es el unico paso a mano de todo el proceso.
+
+1. Activa este mod desde OvGME como cualquier otro, con tu perfil apuntando
+   a la carpeta de instalacion de DCS World (la que contiene MissionEditor\
+   y bin\).
+
+2. Abre con el Bloc de notas:
+
+     <tu instalacion de DCS>\MissionEditor\MissionEditor.lua
+
+   y pega esto al FINAL del fichero (no borres nada de lo que ya haya,
+   solo añade estas 3 lineas al final):
+
+     -- ACTUAL-METAR-BEGIN (no editar a mano; gestionado por install.ps1)
+     require('actual_metar.init')
+     -- ACTUAL-METAR-END
+
+   Guarda el fichero.
+
+3. Reinicia DCS World POR COMPLETO (no solo el Mission Editor — todo el
+   juego), porque MissionEditor.lua solo se carga una vez por arranque.
+
+4. Abre el Mission Editor: deberia aparecer "ACTUAL METAR" en la barra de
+   menu superior.
+
+Para desinstalar: desactiva el mod desde OvGME Y quita a mano esas 3
+lineas de MissionEditor.lua (OvGME no puede hacerlo por ti, tampoco al
+desinstalar).
+
+Nota sobre bin-mt\: si tu instalacion de DCS no usa la build multihilo,
+este paquete puede crear una carpeta "bin-mt" con 3 DLLs sin usar. Es
+inofensivo — DCS no la lee si no la necesita.
+
+¿Por que este paquete además del .exe? El instalador .exe es mas comodo
+(un clic y listo), pero al no estar firmado digitalmente, algunos
+antivirus lo marcan como sospechoso la primera vez que se descarga o
+ejecuta — es un falso positivo conocido y muy comun en herramientas hechas
+con PyInstaller sin firmar (ver la seccion "¿Es esto seguro?" del README
+del proyecto). Este paquete evita el problema por completo porque no hay
+ningun ejecutable compilado, solo ficheros sueltos que copia OvGME.

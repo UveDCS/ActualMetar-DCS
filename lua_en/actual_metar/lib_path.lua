@@ -4,10 +4,15 @@
 -- LuaSec). Same mechanism used by dcs-sms (see its README, "Community
 -- prefabs" section).
 --
--- Looks first in our own folder (<Saved Games>/DCS/actual-metar/lib/) and,
--- if not there, reuses dcs-sms's if the user already has it installed
--- (<Saved Games>/DCS/dcs-sms/lib/) — avoids asking them to install the
--- same payload twice.
+-- Search order:
+--   1. Our own module folder (MissionEditor\modules\actual_metar\lib\) —
+--      this is how the payload arrives via the OvGME package (which can
+--      only copy files inside the DCS folder, not Saved Games), and also
+--      how the .exe installer places it from this version onward.
+--   2. <Saved Games>\DCS\actual-metar\lib\ — where older .exe installer
+--      versions left it (kept for compatibility, nobody needs to reinstall).
+--   3. <Saved Games>\DCS\dcs-sms\lib\ — reuses dcs-sms's payload if the
+--      user already has it installed, to avoid asking twice.
 
 local paths = require("actual_metar.paths")
 
@@ -15,8 +20,24 @@ local M = {}
 
 local LIB_DIR = nil
 
+-- Folder this very file lives in (MissionEditor\modules\actual_metar\),
+-- computed with debug.getinfo instead of assuming a fixed path: works the
+-- same whether the mod was installed via the .exe or by hand (OvGME).
+local function own_module_dir()
+    local source = debug.getinfo(1, "S").source
+    source = source:gsub("^@", "")
+    return source:match("^(.*[\\/])")
+end
+
 function M.resolve()
     if LIB_DIR then return LIB_DIR end
+
+    local module_dir = own_module_dir()
+    if module_dir and paths.dir_exists(module_dir .. "lib\\") then
+        LIB_DIR = module_dir .. "lib\\"
+        return LIB_DIR
+    end
+
     local base = paths.saved_games_dir()
     if not base then return nil end
 

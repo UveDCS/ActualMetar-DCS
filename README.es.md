@@ -131,6 +131,16 @@ mod y vuelve a parchear si hace falta.
 
 **Desinstalar:** ejecuta el `.exe` de nuevo y elige la opción **2**.
 
+### Alternativa sin `.exe`: paquete OvGME
+
+Si prefieres no ejecutar ningún ejecutable (por ejemplo, para evitar un
+aviso de antivirus — ver [¿Es esto seguro?](#es-esto-seguro)), descarga
+`ActualMetar-ES-OvGME.zip` desde [Releases](../../releases) e instálalo con
+[OvGME](https://wiki.hoggitworld.com/view/OVGME) o JSGME. Solo hay un paso
+manual que estas herramientas no pueden automatizar (añadir una línea a
+`MissionEditor.lua`) — instrucciones dentro del propio zip
+(`OVGME_LEEME.txt`).
+
 ## Uso
 
 1. Abre una misión en el Mission Editor.

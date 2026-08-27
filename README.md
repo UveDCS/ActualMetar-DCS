@@ -121,6 +121,16 @@ anything, it just refreshes the mod files and re-patches if needed.
 
 **Uninstalling:** run the `.exe` again and pick option **2**.
 
+### No-`.exe` alternative: OvGME package
+
+If you'd rather not run any executable (e.g. to avoid an antivirus warning
+— see [Is this safe?](#is-this-safe)), download
+`ActualMetar-EN-OvGME.zip` from [Releases](../../releases) and install it
+with [OvGME](https://wiki.hoggitworld.com/view/OVGME) or JSGME. There's
+only one manual step these tools can't automate (adding one line to
+`MissionEditor.lua`) — instructions are inside the zip
+(`OVGME_README.txt`).
+
 ## Using it
 
 1. Open a mission in the Mission Editor.

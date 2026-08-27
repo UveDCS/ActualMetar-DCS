@@ -47,10 +47,16 @@ jobs:
           Compress-Archive -Path staging/Instalacion-ES/* -DestinationPath Instalacion-ES.zip
           Compress-Archive -Path staging/Installation-EN/* -DestinationPath Installation-EN.zip
 
+      - name: Build OvGME packages
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}" -replace '^v', ''
+          ./ovgme/build_ovgme_packages.ps1 -Version $version -OutDir .
+
       - name: Compute SHA256 checksums
         shell: pwsh
         run: |
-          $files = "installer/dist/actual-metar.exe", "installer/dist/actual-metar-en.exe", "Instalacion-ES.zip", "Installation-EN.zip"
+          $files = "installer/dist/actual-metar.exe", "installer/dist/actual-metar-en.exe", "Instalacion-ES.zip", "Installation-EN.zip", "ActualMetar-ES-OvGME.zip", "ActualMetar-EN-OvGME.zip"
           Get-FileHash -Path $files -Algorithm SHA256 |
             ForEach-Object { "$($_.Hash.ToLower())  $(Split-Path -Leaf $_.Path)" } |
             Out-File -Encoding ascii SHA256SUMS.txt
@@ -66,6 +72,8 @@ jobs:
             "installer/dist/actual-metar-en.exe" \
             "Instalacion-ES.zip" \
             "Installation-EN.zip" \
+            "ActualMetar-ES-OvGME.zip" \
+            "ActualMetar-EN-OvGME.zip" \
             "SHA256SUMS.txt" \
             --title "ACTUAL METAR ${{ github.ref_name }}" \
             --generate-notes

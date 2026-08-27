@@ -15,7 +15,7 @@ import os
 import shutil
 import sys
 
-VERSION = "0.2.0"
+VERSION = "0.2.1"
 
 # IMPORTANT: this text must be IDENTICAL to install.ps1's marker (and to
 # installer.py's, the Spanish build) - not translated. Both language
@@ -179,11 +179,29 @@ def prompt_manual_path():
     return raw
 
 
-def install_luasec(dcs_path):
+def _copy_tree(src, dst):
+    for root, _dirs, files in os.walk(src):
+        rel = os.path.relpath(root, src)
+        dst_root = dst if rel == "." else os.path.join(dst, rel)
+        os.makedirs(dst_root, exist_ok=True)
+        for name in files:
+            shutil.copy2(os.path.join(root, name), os.path.join(dst_root, name))
+
+
+def install_luasec(dcs_path, modules_dir):
     """Copies the bundled LuaSec/OpenSSL payload so HTTPS fetches work with no
     manual steps (see luasec_payload/ATTRIBUTION.txt for provenance and
-    licenses). lib/ -> Saved Games\\DCS\\actual-metar\\lib\\; bin/ -> <DCS>\\bin\\
-    and \\bin-mt\\ (whichever exist)."""
+    licenses).
+
+    lib/ gets copied to TWO places (same content):
+      - <modules_dir>\\lib\\ (inside the mod's own folder in the DCS
+        install) — this is what lib_path.lua checks first, and it's also
+        where the OvGME package leaves it, so both install methods resolve
+        the same way.
+      - Saved Games\\DCS\\actual-metar\\lib\\ — kept only for compatibility
+        with older installer versions; nobody needs to reinstall over this
+        change.
+    bin/ -> <DCS>\\bin\\ and \\bin-mt\\ (whichever exist)."""
     payload = bundled_luasec_dir()
     lib_src = os.path.join(payload, "lib")
     bin_src = os.path.join(payload, "bin")
@@ -192,6 +210,10 @@ def install_luasec(dcs_path):
         print("the HTTPS fetch may not work.")
         return
 
+    module_lib_dst = os.path.join(modules_dir, "lib")
+    _copy_tree(lib_src, module_lib_dst)
+    print(f"LuaSec (HTTPS) installed to: {module_lib_dst}")
+
     saved_games = resolve_saved_games_dir(dcs_path)
     own_dir = os.path.join(saved_games, "actual-metar")
     old_own_dir = os.path.join(saved_games, "real-metar")
@@ -199,14 +221,7 @@ def install_luasec(dcs_path):
         shutil.move(old_own_dir, own_dir)
         print(f"Old 'real-metar' folder migrated to 'actual-metar': {own_dir}")
 
-    lib_dst = os.path.join(own_dir, "lib")
-    for root, _dirs, files in os.walk(lib_src):
-        rel = os.path.relpath(root, lib_src)
-        dst_root = lib_dst if rel == "." else os.path.join(lib_dst, rel)
-        os.makedirs(dst_root, exist_ok=True)
-        for name in files:
-            shutil.copy2(os.path.join(root, name), os.path.join(dst_root, name))
-    print(f"LuaSec (HTTPS) installed to: {lib_dst}")
+    _copy_tree(lib_src, os.path.join(own_dir, "lib"))
 
     bin_dirs = [os.path.join(dcs_path, "bin"), os.path.join(dcs_path, "bin-mt")]
     installed_bin = [bd for bd in bin_dirs if os.path.isdir(bd)]
@@ -274,7 +289,7 @@ def install(dcs_path):
         print("MissionEditor.lua already had the ACTUAL METAR require (left untouched).")
 
     print()
-    install_luasec(dcs_path)
+    install_luasec(dcs_path, modules_dir)
 
     print()
     print("Install complete.")

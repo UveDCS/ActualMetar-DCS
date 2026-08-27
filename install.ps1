@@ -99,7 +99,7 @@ function Find-SavedGamesPath {
 }
 
 function Install-LuaSec {
-    param([string]$Dcs)
+    param([string]$Dcs, [string]$ModulesDir)
 
     $payload = Join-Path $PSScriptRoot "luasec_payload"
     $libSrc = Join-Path $payload "lib"
@@ -109,6 +109,16 @@ function Install-LuaSec {
         return
     }
 
+    # 1) Dentro de la propia carpeta del mod (lo que mira lib_path.lua primero,
+    #    y donde tambien lo deja el paquete OvGME - misma resolucion en ambas
+    #    vias de instalacion).
+    $moduleLibDst = Join-Path $ModulesDir "lib"
+    New-Item -ItemType Directory -Force -Path $moduleLibDst | Out-Null
+    Copy-Item -Path (Join-Path $libSrc "*") -Destination $moduleLibDst -Recurse -Force
+    Write-Host "LuaSec (HTTPS) instalado en: $moduleLibDst" -ForegroundColor Green
+
+    # 2) Saved Games, solo por compatibilidad con instalaciones hechas con
+    #    versiones anteriores del instalador.
     $savedGames = Find-SavedGamesPath -Dcs $Dcs
     $ownDir = Join-Path $savedGames "actual-metar"
     $oldOwnDir = Join-Path $savedGames "real-metar"
@@ -120,7 +130,6 @@ function Install-LuaSec {
     $libDst = Join-Path $ownDir "lib"
     New-Item -ItemType Directory -Force -Path $libDst | Out-Null
     Copy-Item -Path (Join-Path $libSrc "*") -Destination $libDst -Recurse -Force
-    Write-Host "LuaSec (HTTPS) instalado en: $libDst" -ForegroundColor Green
 
     $binDirs = @((Join-Path $Dcs "bin"), (Join-Path $Dcs "bin-mt")) | Where-Object { Test-Path $_ }
     foreach ($bd in $binDirs) {
@@ -209,7 +218,7 @@ if ($content -notmatch [regex]::Escape($BeginMarker)) {
 }
 
 Write-Host ""
-Install-LuaSec -Dcs $dcs
+Install-LuaSec -Dcs $dcs -ModulesDir $modulesDir
 
 Write-Host ""
 Write-Host "Instalacion completa." -ForegroundColor Green
